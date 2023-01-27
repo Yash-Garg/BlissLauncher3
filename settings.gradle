@@ -1,5 +1,24 @@
-include ':IconLoader'
-project(':IconLoader').projectDir = new File(rootDir, 'iconloaderlib')
+pluginManagement {
+    repositories {
+        google()
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
 
-include ':SharedLibWrapper'
-project(':SharedLibWrapper').projectDir = new File(rootDir, 'SharedLibWrapper')
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://jitpack.io" }
+    }
+}
+
+include ':IconLoader'
+project(':IconLoader').projectDir = new File("$rootDir/libs_systemui", 'iconloaderlib')
+
+include ':SearchUiLib'
+project(':SearchUiLib').projectDir = new File("$rootDir/libs_systemui", 'searchuilib')
+
+rootProject.name = "BlissLauncher3"
