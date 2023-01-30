@@ -84,7 +84,7 @@ public class PageIndicatorDots extends View implements PageIndicator {
         }
     };
 
-    private final Paint mPaginationPaint;
+    protected final Paint mPaginationPaint;
     private final Drawable mPageIndicatorDrawable;
     private final float mDotRadius;
     private final float mCircleGap;
@@ -92,7 +92,7 @@ public class PageIndicatorDots extends View implements PageIndicator {
     private final float mPageIndicatorRadius;
     private final boolean mIsRtl;
 
-    private int mNumPages;
+    protected int mNumPages;
     private int mActivePage;
     private int mCurrentScroll;
     private int mTotalScroll;
@@ -169,6 +169,10 @@ public class PageIndicatorDots extends View implements PageIndicator {
         }
 
         int scrollPerPage = totalScroll / (mNumPages - 1);
+        if (scrollPerPage == 0) {
+            return;
+        }
+
         int pageToLeft = currentScroll / scrollPerPage;
         int pageToLeftScroll = pageToLeft * scrollPerPage;
         int pageToRightScroll = pageToLeftScroll + scrollPerPage;
