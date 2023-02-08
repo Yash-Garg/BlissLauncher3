@@ -42,6 +42,7 @@
         android:summary="@string/auto_add_shortcuts_description"
         android:defaultValue="true"
         android:persistent="true"
+        launcher:isPreferenceVisible="false"
         launcher:logIdOn="613"
         launcher:logIdOff="614" />
 
