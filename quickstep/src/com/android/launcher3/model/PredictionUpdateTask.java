@@ -75,7 +75,7 @@ public class PredictionUpdateTask extends BaseModelUpdateTask {
             if (si != null) {
                 usersForChangedShortcuts.add(si.getUserHandle());
                 itemInfo = new WorkspaceItemInfo(si, context);
-                app.getIconCache().getShortcutIcon(itemInfo, si);
+                app.getIconCache().getUnbadgedShortcutIcon(itemInfo, si);
             } else {
                 String className = target.getClassName();
                 if (COMPONENT_CLASS_MARKER.equals(className)) {

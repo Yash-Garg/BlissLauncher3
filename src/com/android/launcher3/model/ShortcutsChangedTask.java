@@ -108,7 +108,7 @@ public class ShortcutsChangedTask extends BaseModelUpdateTask {
                         .filter(itemInfo -> sid.equals(itemInfo.getDeepShortcutId()))
                         .forEach(workspaceItemInfo -> {
                             workspaceItemInfo.updateFromDeepShortcutInfo(fullDetails, context);
-                            app.getIconCache().getShortcutIcon(workspaceItemInfo, fullDetails);
+                            app.getIconCache().getUnbadgedShortcutIcon(workspaceItemInfo, fullDetails);
                             updatedWorkspaceItemInfos.add(workspaceItemInfo);
                         });
             }

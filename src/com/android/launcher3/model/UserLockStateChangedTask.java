@@ -90,7 +90,7 @@ public class UserLockStateChangedTask extends BaseModelUpdateTask {
                         }
                         si.runtimeStatusFlags &= ~FLAG_DISABLED_LOCKED_USER;
                         si.updateFromDeepShortcutInfo(shortcut, context);
-                        app.getIconCache().getShortcutIcon(si, shortcut);
+                        app.getIconCache().getUnbadgedShortcutIcon(si, shortcut);
                     } else {
                         si.runtimeStatusFlags |= FLAG_DISABLED_LOCKED_USER;
                     }

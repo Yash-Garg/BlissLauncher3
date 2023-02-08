@@ -477,7 +477,7 @@ public class QuickstepModelDelegate extends ModelDelegate {
                     }
                     WorkspaceItemInfo wii = new WorkspaceItemInfo(si, mAppState.getContext());
                     wii.container = mContainer;
-                    mAppState.getIconCache().getShortcutIcon(wii, si);
+                    mAppState.getIconCache().getUnbadgedShortcutIcon(wii, si);
                     mReadCount++;
                     return wii;
                 }

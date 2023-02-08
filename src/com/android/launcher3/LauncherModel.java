@@ -658,7 +658,7 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
             @NonNull final ShortcutInfo info) {
         updateAndBindWorkspaceItem(() -> {
             si.updateFromDeepShortcutInfo(info, mApp.getContext());
-            mApp.getIconCache().getShortcutIcon(si, info);
+            mApp.getIconCache().getUnbadgedShortcutIcon(si, info);
             return si;
         });
     }

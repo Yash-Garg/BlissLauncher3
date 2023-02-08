@@ -323,7 +323,7 @@ public class ItemInstallQueue {
                 case ITEM_TYPE_DEEP_SHORTCUT: {
                     WorkspaceItemInfo itemInfo = new WorkspaceItemInfo(shortcutInfo, context);
                     LauncherAppState.getInstance(context).getIconCache()
-                            .getShortcutIcon(itemInfo, shortcutInfo);
+                            .getUnbadgedShortcutIcon(itemInfo, shortcutInfo);
                     return Pair.create(itemInfo, shortcutInfo);
                 }
                 case ITEM_TYPE_APPWIDGET: {

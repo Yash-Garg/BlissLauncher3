@@ -576,7 +576,7 @@ public class LoaderTask implements Runnable {
                                     info = new WorkspaceItemInfo(pinnedShortcut, context);
                                     // If the pinned deep shortcut is no longer published,
                                     // use the last saved icon instead of the default.
-                                    mIconCache.getShortcutIcon(info, pinnedShortcut, c::loadIcon);
+                                    mIconCache.getShortcutIcon(info, pinnedShortcut, false, c::loadIcon);
 
                                     if (pmHelper.isAppSuspended(
                                             pinnedShortcut.getPackage(), info.user)) {
