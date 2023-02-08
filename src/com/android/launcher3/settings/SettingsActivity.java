@@ -18,6 +18,7 @@ package com.android.launcher3.settings;
 
 import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.ACTION_ACCESSIBILITY_FOCUS;
 
+import static com.android.launcher3.SessionCommitReceiver.ADD_ICON_PREFERENCE_KEY;
 import static com.android.launcher3.states.RotationHelper.ALLOW_ROTATION_PREFERENCE_KEY;
 
 import android.content.Intent;
@@ -300,6 +301,9 @@ public class SettingsActivity extends FragmentActivity
                     preference.setDefaultValue(isSingleLayer);
                     ((SwitchPreference) preference).setChecked(isSingleLayer);
                     return true;
+
+                case ADD_ICON_PREFERENCE_KEY:
+                    return !MultiModeController.isSingleLayerMode();
             }
 
             return true;
