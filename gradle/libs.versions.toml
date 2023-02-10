@@ -21,6 +21,7 @@ androidx-slice-view = "androidx.slice:slice-view:1.0.0"
 airbnb-lottie = "com.airbnb.android:lottie:6.0.0"
 build-spotless = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
 coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+debug-db = "com.amitshekhar.android:debug-db:1.0.4"
 #noinspection GradleDependency
 google-material = "com.google.android.material:material:1.6.1"
 google-protobuf-javalite = "com.google.protobuf:protobuf-javalite:3.21.1"

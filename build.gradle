@@ -229,6 +229,7 @@ dependencies {
     implementation libs.androidx.dynamicanimation
     implementation libs.androidx.recyclerview
     implementation libs.androidx.preference
+    debugImplementation libs.debug.db
     implementation libs.google.protobuf.javalite
     implementation libs.google.material
     implementation libs.androidx.slice.view
