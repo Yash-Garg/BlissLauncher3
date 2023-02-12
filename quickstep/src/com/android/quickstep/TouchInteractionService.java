@@ -127,6 +127,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.function.Function;
 
+import foundation.e.bliss.LauncherAppMonitor;
+
 /**
  * Service connected by system-UI for handling touch interaction.
  */
@@ -415,6 +417,7 @@ public class TouchInteractionService extends Service
         super.onCreate();
         // Initialize anything here that is needed in direct boot mode.
         // Everything else should be initialized in onUserUnlocked() below.
+        LauncherAppMonitor.getInstance(this);
         mMainChoreographer = Choreographer.getInstance();
         mAM = ActivityManagerWrapper.getInstance();
         mDeviceState = new RecentsAnimationDeviceState(this, true);
