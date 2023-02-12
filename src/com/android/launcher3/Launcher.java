@@ -240,6 +240,8 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import foundation.e.bliss.LauncherAppMonitor;
+
 /**
  * Default launcher application.
  */
@@ -408,6 +410,8 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     private CellPosMapper mCellPosMapper = CellPosMapper.DEFAULT;
 
+    private LauncherAppMonitor mAppMonitor;
+
     @Override
     @TargetApi(Build.VERSION_CODES.S)
     protected void onCreate(Bundle savedInstanceState) {
@@ -471,6 +475,9 @@ public class Launcher extends StatefulActivity<LauncherState>
                 }
             });
         }
+
+        mAppMonitor = LauncherAppMonitor.getInstance(this);
+        mAppMonitor.onLauncherPreCreate(this);
 
         super.onCreate(savedInstanceState);
 
@@ -549,6 +556,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                 LauncherOverlayPlugin.class, false /* allowedMultiple */);
 
         mRotationHelper.initialize();
+        mAppMonitor.onLauncherCreated();
         TraceHelper.INSTANCE.endSection(traceToken);
 
         mUserChangedCallbackCloseable = UserCache.INSTANCE.get(this).addUserChangeListener(
@@ -694,7 +702,6 @@ public class Launcher extends StatefulActivity<LauncherState>
         if (!initDeviceProfile(mDeviceProfile.inv)) {
             return;
         }
-
         dispatchDeviceProfileChanged();
         reapplyUi();
         mDragLayer.recreateControllers();
@@ -976,6 +983,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
             int[] grantResults) {
         PendingRequestArgs pendingArgs = mPendingRequestArgs;
+        mAppMonitor.onLauncherRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_PERMISSION_CALL_PHONE && pendingArgs != null
                 && pendingArgs.getRequestCode() == REQUEST_PERMISSION_CALL_PHONE) {
             setWaitingForResult(null);
@@ -1064,12 +1072,14 @@ public class Launcher extends StatefulActivity<LauncherState>
         logStopAndResume(false /* isResume */);
         mAppWidgetHolder.setActivityStarted(false);
         NotificationListener.removeNotificationsChangedListener(getPopupDataProvider());
+        mAppMonitor.onLauncherStop();
     }
 
     @Override
     protected void onStart() {
         Object traceToken = TraceHelper.INSTANCE.beginSection(ON_START_EVT,
                 TraceHelper.FLAG_UI_EVENT);
+        mAppMonitor.onLauncherStart();
         super.onStart();
         if (!mDeferOverlayCallbacks) {
             mOverlayManager.onActivityStarted(this);
@@ -1249,6 +1259,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     protected void onResume() {
         Object traceToken = TraceHelper.INSTANCE.beginSection(ON_RESUME_EVT,
                 TraceHelper.FLAG_UI_EVENT);
+        mAppMonitor.onLauncherPreResume();
         super.onResume();
 
         if (mDeferOverlayCallbacks) {
@@ -1258,6 +1269,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         }
 
         DragView.removeAllViews(this);
+        mAppMonitor.onLauncherResumed();
         TraceHelper.INSTANCE.endSection(traceToken);
     }
 
@@ -1266,6 +1278,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         // Ensure that items added to Launcher are queued until Launcher returns
         ItemInstallQueue.INSTANCE.get(this).pauseModelPush(FLAG_ACTIVITY_PAUSED);
 
+        mAppMonitor.onLauncherPrePause();
         super.onPause();
         mDragController.cancelDrag();
         mLastTouchUpTime = -1;
@@ -1275,6 +1288,7 @@ public class Launcher extends StatefulActivity<LauncherState>
             mOverlayManager.onActivityPaused(this);
         }
         mAppWidgetHolder.setActivityResumed(false);
+        mAppMonitor.onLauncherPaused();
     }
 
     /**
@@ -1665,6 +1679,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         boolean internalStateHandled = ACTIVITY_TRACKER.handleNewIntent(this);
 
         if (isActionMain) {
+            mAppMonitor.onReceiveHomeIntent();
             if (!internalStateHandled) {
                 // In all these cases, only animate if we're already on home
                 closeOpenViews(isStarted());
@@ -1793,6 +1808,7 @@ public class Launcher extends StatefulActivity<LauncherState>
 
         mOverlayManager.onActivityDestroyed(this);
         mUserChangedCallbackCloseable.close();
+        mAppMonitor.onLauncherDestroy(this);
     }
 
     public LauncherAccessibilityDelegate getAccessibilityDelegate() {
@@ -2818,6 +2834,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                 mDeviceProfile.inv.numFolderColumns * mDeviceProfile.inv.numFolderRows);
         getViewCache().setCacheSize(R.layout.folder_page, 2);
 
+        mAppMonitor.onLauncherWorkspaceBindingFinish();
         TraceHelper.INSTANCE.endSection(traceToken);
 
         mWorkspace.removeExtraEmptyScreen(true);
@@ -2973,6 +2990,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     public void bindAllApplications(AppInfo[] apps, int flags) {
         mAppsView.getAppsStore().setApps(apps, flags);
         PopupContainerWithArrow.dismissInvalidPopup(this);
+        mAppMonitor.onLauncherAllAppBindingFinish(apps);
         if (Utilities.ATLEAST_S) {
             Trace.endAsyncSection(DISPLAY_ALL_APPS_TRACE_METHOD_NAME,
                     DISPLAY_ALL_APPS_TRACE_COOKIE);
@@ -3117,6 +3135,7 @@ public class Launcher extends StatefulActivity<LauncherState>
             mLauncherCallbacks.dump(prefix, fd, writer, args);
         }
         mOverlayManager.dump(prefix, writer);
+        mAppMonitor.dump(prefix, fd, writer, args);
     }
 
     @Override
