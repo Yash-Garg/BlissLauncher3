@@ -76,6 +76,8 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import foundation.e.bliss.LauncherAppMonitor;
+
 /**
  * Maintains in-memory state of the Launcher. It is expected that there should be only one
  * LauncherModel object held in a static. Also provide APIs for updating the database state
@@ -285,6 +287,7 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
                 }
             }
         }
+        LauncherAppMonitor.getInstance(mApp.getContext()).onReceive(intent);
     }
 
     /**

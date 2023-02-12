@@ -54,6 +54,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import foundation.e.bliss.LauncherAppMonitor;
+
 /**
  * Utility class to cache properties of default display to avoid a system RPC on every call.
  */
@@ -277,7 +279,10 @@ public class DisplayController implements DisplayListener, ComponentCallbacks, S
         if (change != 0) {
             mInfo = newInfo;
             final int flags = change;
-            MAIN_EXECUTOR.execute(() -> notifyChange(displayContext, flags));
+            MAIN_EXECUTOR.execute(() -> {
+                LauncherAppMonitor.getInstance(mContext).onUIConfigChanged();
+                notifyChange(displayContext, flags); }
+            );
         }
     }
 

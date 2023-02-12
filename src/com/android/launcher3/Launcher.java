@@ -229,6 +229,8 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import foundation.e.bliss.LauncherAppMonitor;
+
 /**
  * Default launcher application.
  */
@@ -381,6 +383,8 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     protected InstanceId mAllAppsSessionLogId;
     private LauncherState mPrevLauncherState;
 
+    private LauncherAppMonitor mAppMonitor;
+
     @Override
     @TargetApi(Build.VERSION_CODES.S)
     protected void onCreate(Bundle savedInstanceState) {
@@ -445,6 +449,9 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 }
             });
         }
+
+        mAppMonitor = LauncherAppMonitor.getInstance(this);
+        mAppMonitor.onLauncherPreCreate(this);
 
         super.onCreate(savedInstanceState);
 
@@ -523,6 +530,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 OverlayPlugin.class, false /* allowedMultiple */);
 
         mRotationHelper.initialize();
+        mAppMonitor.onLauncherCreated();
         TraceHelper.INSTANCE.endSection(traceToken);
 
         mUserChangedCallbackCloseable = UserCache.INSTANCE.get(this).addUserChangeListener(
@@ -591,6 +599,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         int diff = newConfig.diff(mOldConfig);
+        mAppMonitor.onLauncherConfigurationChanged(diff);
         if ((diff & (CONFIG_ORIENTATION | CONFIG_SCREEN_SIZE)) != 0) {
             onIdpChanged(false);
         }
@@ -610,6 +619,12 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         // initialized properly.
         onSaveInstanceState(new Bundle());
         mModel.rebindCallbacks();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        mAppMonitor.onLauncherFocusChanged(hasFocus);
     }
 
     public void onAssistantVisibilityChanged(float visibility) {
@@ -872,6 +887,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
             int[] grantResults) {
         PendingRequestArgs pendingArgs = mPendingRequestArgs;
+        mAppMonitor.onLauncherRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_PERMISSION_CALL_PHONE && pendingArgs != null
                 && pendingArgs.getRequestCode() == REQUEST_PERMISSION_CALL_PHONE) {
             setWaitingForResult(null);
@@ -958,12 +974,14 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         logStopAndResume(false /* isResume */);
         mAppWidgetHost.setActivityStarted(false);
         NotificationListener.removeNotificationsChangedListener();
+        mAppMonitor.onLauncherStop();
     }
 
     @Override
     protected void onStart() {
         Object traceToken = TraceHelper.INSTANCE.beginSection(ON_START_EVT,
                 TraceHelper.FLAG_UI_EVENT);
+        mAppMonitor.onLauncherStart();
         super.onStart();
         if (!mDeferOverlayCallbacks) {
             mOverlayManager.onActivityStarted(this);
@@ -1137,6 +1155,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     protected void onResume() {
         Object traceToken = TraceHelper.INSTANCE.beginSection(ON_RESUME_EVT,
                 TraceHelper.FLAG_UI_EVENT);
+        mAppMonitor.onLauncherPreResume();
         super.onResume();
 
         if (mDeferOverlayCallbacks) {
@@ -1145,6 +1164,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             mOverlayManager.onActivityResumed(this);
         }
 
+        mAppMonitor.onLauncherResumed();
         TraceHelper.INSTANCE.endSection(traceToken);
     }
 
@@ -1153,6 +1173,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         // Ensure that items added to Launcher are queued until Launcher returns
         ItemInstallQueue.INSTANCE.get(this).pauseModelPush(FLAG_ACTIVITY_PAUSED);
 
+        mAppMonitor.onLauncherPrePause();
         super.onPause();
         mDragController.cancelDrag();
         mLastTouchUpTime = -1;
@@ -1162,6 +1183,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             mOverlayManager.onActivityPaused(this);
         }
         mAppWidgetHost.setActivityResumed(false);
+        mAppMonitor.onLauncherPaused();
     }
 
     /**
@@ -1552,6 +1574,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         boolean internalStateHandled = ACTIVITY_TRACKER.handleNewIntent(this);
         hideKeyboard();
         if (isActionMain) {
+            mAppMonitor.onReceiveHomeIntent();
             if (!internalStateHandled) {
                 // In all these cases, only animate if we're already on home
                 closeOpenViews(isStarted());
@@ -1683,6 +1706,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
 
         mOverlayManager.onActivityDestroyed(this);
         mUserChangedCallbackCloseable.close();
+        mAppMonitor.onLauncherDestroy(this);
     }
 
     public LauncherAccessibilityDelegate getAccessibilityDelegate() {
@@ -2704,6 +2728,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 mDeviceProfile.inv.numFolderColumns * mDeviceProfile.inv.numFolderRows);
         getViewCache().setCacheSize(R.layout.folder_page, 2);
 
+        mAppMonitor.onLauncherWorkspaceBindingFinish();
         TraceHelper.INSTANCE.endSection(traceToken);
     }
 
@@ -2814,6 +2839,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     public void bindAllApplications(AppInfo[] apps, int flags) {
         mAppsView.getAppsStore().setApps(apps, flags);
         PopupContainerWithArrow.dismissInvalidPopup(this);
+        mAppMonitor.onLauncherAllAppBindingFinish(apps);
         if (Utilities.ATLEAST_S) {
             Trace.endAsyncSection(DISPLAY_ALL_APPS_TRACE_METHOD_NAME,
                     DISPLAY_ALL_APPS_TRACE_COOKIE);
@@ -2947,6 +2973,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             mLauncherCallbacks.dump(prefix, fd, writer, args);
         }
         mOverlayManager.dump(prefix, writer);
+        mAppMonitor.dump(prefix, fd, writer, args);
     }
 
     @Override

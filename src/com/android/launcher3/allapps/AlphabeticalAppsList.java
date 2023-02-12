@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 
+import foundation.e.bliss.LauncherAppMonitor;
+
 /**
  * The alphabetically sorted list of applications.
  */
@@ -255,6 +257,7 @@ public class AlphabeticalAppsList implements AllAppsStore.OnUpdateListener {
             }
         }
 
+        LauncherAppMonitor.getInstance(mLauncher).onAllAppsListUpdated(mApps);
         // Recompose the set of adapter items from the current set of apps
         if (mSearchResults == null) {
             updateAdapterItems();
