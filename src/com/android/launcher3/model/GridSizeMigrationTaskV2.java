@@ -178,12 +178,12 @@ public class GridSizeMigrationTaskV2 {
                 LauncherSettings.Settings.EXTRA_VALUE)) {
 
             DbReader srcReader = new DbReader(t.getDb(),
-                    migrateForPreview ? LauncherSettings.Favorites.TABLE_NAME
-                            : LauncherSettings.Favorites.TMP_TABLE,
+                    migrateForPreview ? LauncherSettings.Favorites.getFavoritesTableName()
+                            : LauncherSettings.Favorites.getTempTableName(),
                     context, validPackages);
             DbReader destReader = new DbReader(t.getDb(),
-                    migrateForPreview ? LauncherSettings.Favorites.PREVIEW_TABLE_NAME
-                            : LauncherSettings.Favorites.TABLE_NAME,
+                    migrateForPreview ? LauncherSettings.Favorites.getPreviewTableName()
+                            : LauncherSettings.Favorites.getFavoritesTableName(),
                     context, validPackages);
 
             Point targetSize = new Point(destDeviceState.getColumns(), destDeviceState.getRows());
@@ -192,7 +192,7 @@ public class GridSizeMigrationTaskV2 {
             task.migrate(srcDeviceState, destDeviceState);
 
             if (!migrateForPreview) {
-                dropTable(t.getDb(), LauncherSettings.Favorites.TMP_TABLE);
+                dropTable(t.getDb(), LauncherSettings.Favorites.getTempTableName());
             }
 
             t.commit();
@@ -389,12 +389,12 @@ public class GridSizeMigrationTaskV2 {
             mDestReader = destReader;
             mContext = context;
             mOccupied = new GridOccupancy(trgX, trgY);
-            mScreenId = screenId;
+            mScreenId = screenId == 0 && FeatureFlags.QSB_ON_FIRST_SCREEN
+                    ? 1 /* smartspace */ : screenId; // Skip QSB screen
             mTrgX = trgX;
             mTrgY = trgY;
             mNextStartX = 0;
-            mNextStartY = mScreenId == 0 && FeatureFlags.QSB_ON_FIRST_SCREEN
-                    ? 1 /* smartspace */ : 0;
+            mNextStartY = 0;
             List<DbEntry> existedEntries = mDestReader.mWorkspaceEntriesByScreenId.get(screenId);
             if (existedEntries != null) {
                 for (DbEntry entry : existedEntries) {

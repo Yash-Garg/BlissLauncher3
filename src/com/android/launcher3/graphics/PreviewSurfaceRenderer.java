@@ -142,7 +142,7 @@ public class PreviewSurfaceRenderer {
         final String query = LauncherSettings.Favorites.ITEM_TYPE + " = "
                 + LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET;
 
-        try (Cursor c = context.getContentResolver().query(LauncherSettings.Favorites.CONTENT_URI,
+        try (Cursor c = context.getContentResolver().query(LauncherSettings.Favorites.getContentUri(),
                 new String[] {
                         LauncherSettings.Favorites.APPWIDGET_ID,
                         LauncherSettings.Favorites.SPANX,
@@ -215,7 +215,7 @@ public class PreviewSurfaceRenderer {
                         query += " or " + LauncherSettings.Favorites.SCREEN + " = "
                                 + Workspace.SECOND_SCREEN_ID;
                     }
-                    loadWorkspace(new ArrayList<>(), LauncherSettings.Favorites.PREVIEW_CONTENT_URI,
+                    loadWorkspace(new ArrayList<>(), LauncherSettings.Favorites.getPreviewContentUri(),
                             query);
 
                     final SparseArray<Size> spanInfo =
