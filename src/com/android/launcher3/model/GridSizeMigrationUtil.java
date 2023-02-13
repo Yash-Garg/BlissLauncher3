@@ -148,12 +148,12 @@ public class GridSizeMigrationUtil {
                 LauncherSettings.Settings.EXTRA_VALUE)) {
 
             DbReader srcReader = new DbReader(t.getDb(),
-                    migrateForPreview ? LauncherSettings.Favorites.TABLE_NAME
-                            : LauncherSettings.Favorites.TMP_TABLE,
+                    migrateForPreview ? LauncherSettings.Favorites.getFavoritesTableName()
+                            : LauncherSettings.Favorites.getTempTableName(),
                     context, validPackages);
             DbReader destReader = new DbReader(t.getDb(),
-                    migrateForPreview ? LauncherSettings.Favorites.PREVIEW_TABLE_NAME
-                            : LauncherSettings.Favorites.TABLE_NAME,
+                    migrateForPreview ? LauncherSettings.Favorites.getPreviewTableName()
+                            : LauncherSettings.Favorites.getFavoritesTableName(),
                     context, validPackages);
 
             Point targetSize = new Point(destDeviceState.getColumns(), destDeviceState.getRows());
@@ -161,7 +161,7 @@ public class GridSizeMigrationUtil {
                     targetSize, srcDeviceState, destDeviceState);
 
             if (!migrateForPreview) {
-                dropTable(t.getDb(), LauncherSettings.Favorites.TMP_TABLE);
+                dropTable(t.getDb(), LauncherSettings.Favorites.getTempTableName());
             }
 
             t.commit();
@@ -372,9 +372,10 @@ public class GridSizeMigrationUtil {
             @NonNull final Context context, final int screenId, final int trgX, final int trgY,
             @NonNull final List<DbEntry> sortedItemsToPlace, final boolean matchingScreenIdOnly) {
         final GridOccupancy occupied = new GridOccupancy(trgX, trgY);
+        final int adjScreenId = screenId == 0 && FeatureFlags.QSB_ON_FIRST_SCREEN
+                ? 1 /* smartspace */ : screenId; // Skip QSB screen
         final Point trg = new Point(trgX, trgY);
-        final Point next = new Point(0, screenId == 0 && FeatureFlags.QSB_ON_FIRST_SCREEN
-                ? 1 /* smartspace */ : 0);
+        final Point next = new Point(0, 0);
         List<DbEntry> existedEntries = destReader.mWorkspaceEntriesByScreenId.get(screenId);
         if (existedEntries != null) {
             for (DbEntry entry : existedEntries) {
@@ -384,13 +385,13 @@ public class GridSizeMigrationUtil {
         Iterator<DbEntry> iterator = sortedItemsToPlace.iterator();
         while (iterator.hasNext()) {
             final DbEntry entry = iterator.next();
-            if (matchingScreenIdOnly && entry.screenId < screenId) continue;
-            if (matchingScreenIdOnly && entry.screenId > screenId) break;
+            if (matchingScreenIdOnly && entry.screenId < adjScreenId) continue;
+            if (matchingScreenIdOnly && entry.screenId > adjScreenId) break;
             if (entry.minSpanX > trgX || entry.minSpanY > trgY) {
                 iterator.remove();
                 continue;
             }
-            if (findPlacementForEntry(entry, next, trg, occupied, screenId)) {
+            if (findPlacementForEntry(entry, next, trg, occupied, adjScreenId)) {
                 insertEntryInDb(db, context, entry, srcReader.mTableName, destReader.mTableName);
                 iterator.remove();
             }

@@ -95,7 +95,7 @@ public class AppWidgetsRestoredReceiver extends BroadcastReceiver {
                     .put(LauncherSettings.Favorites.RESTORED, state)
                     .commit();
             if (result == 0) {
-                Cursor cursor = cr.query(Favorites.CONTENT_URI,
+                Cursor cursor = cr.query(Favorites.getContentUri(),
                         new String[] {Favorites.APPWIDGET_ID},
                         "appWidgetId=?", new String[] { oldWidgetId }, null);
                 try {

@@ -118,7 +118,7 @@ public class ContentWriter {
         final String[] mSelectionArgs;
 
         public CommitParams(String where, String[] selectionArgs) {
-            this(LauncherSettings.Favorites.CONTENT_URI, where, selectionArgs);
+            this(LauncherSettings.Favorites.getBackupContentUri(), where, selectionArgs);
         }
 
         private CommitParams(Uri uri, String where, String[] selectionArgs) {
@@ -132,7 +132,7 @@ public class ContentWriter {
          */
         public static CommitParams backupCommitParams(String where, String[] selectionArgs) {
             return new CommitParams(
-                    LauncherSettings.Favorites.BACKUP_CONTENT_URI, where, selectionArgs);
+                    LauncherSettings.Favorites.getBackupContentUri(), where, selectionArgs);
         }
     }
 }

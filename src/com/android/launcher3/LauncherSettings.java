@@ -24,6 +24,8 @@ import android.provider.BaseColumns;
 
 import com.android.launcher3.model.data.ItemInfo;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * Settings related utilities.
  */
@@ -149,50 +151,96 @@ public class LauncherSettings {
         public static final String ICON = "icon";
 
         public static final String TABLE_NAME = "favorites";
+        public static final String TABLE_NAME_ALL = "favorites_all";
+
+        public static String getFavoritesTableName() {
+            return MultiModeController.isSingleLayerMode() ? TABLE_NAME_ALL : TABLE_NAME;
+        }
 
         /**
          * Backup table created when the favorites table is modified during grid migration
          */
         public static final String BACKUP_TABLE_NAME = "favorites_bakup";
+        public static final String BACKUP_TABLE_NAME_ALL = "favorites_bakup_all";
+
+        public static String getBackupTableName() {
+            return MultiModeController.isSingleLayerMode() ? BACKUP_TABLE_NAME_ALL : BACKUP_TABLE_NAME;
+        }
 
         /**
          * Backup table created when user hotseat is moved to workspace for hybrid hotseat
          */
         public static final String HYBRID_HOTSEAT_BACKUP_TABLE = "hotseat_restore_backup";
+        public static final String HYBRID_HOTSEAT_BACKUP_TABLE_ALL = "hotseat_restore_backup_all";
+
+        public static String getHotseatBackupTableName() {
+            return MultiModeController.isSingleLayerMode() ? HYBRID_HOTSEAT_BACKUP_TABLE_ALL : HYBRID_HOTSEAT_BACKUP_TABLE;
+        }
 
         /**
          * Temporary table used specifically for grid migrations during wallpaper preview
          */
         public static final String PREVIEW_TABLE_NAME = "favorites_preview";
+        public static final String PREVIEW_TABLE_NAME_ALL = "favorites_preview_all";
+
+        public static String getPreviewTableName() {
+            return MultiModeController.isSingleLayerMode() ? PREVIEW_TABLE_NAME_ALL : PREVIEW_TABLE_NAME;
+        }
 
         /**
          * Temporary table used specifically for multi-db grid migrations
          */
         public static final String TMP_TABLE = "favorites_tmp";
+        public static final String TMP_TABLE_ALL = "favorites_tmp_all";
+
+        public static String getTempTableName() {
+            return MultiModeController.isSingleLayerMode() ? TMP_TABLE_ALL : TMP_TABLE;
+        }
 
         /**
          * The content:// style URL for "favorites" table
          */
         public static final Uri CONTENT_URI = Uri.parse("content://"
                 + LauncherProvider.AUTHORITY + "/" + TABLE_NAME);
+        private static final Uri CONTENT_URI_ALL = Uri.parse("content://"
+                + LauncherProvider.AUTHORITY + "/" + TABLE_NAME_ALL);
+
+        public static Uri getContentUri() {
+            return MultiModeController.isSingleLayerMode() ? CONTENT_URI_ALL : CONTENT_URI;
+        }
 
         /**
          * The content:// style URL for "favorites_bakup" table
          */
         public static final Uri BACKUP_CONTENT_URI = Uri.parse("content://"
                 + LauncherProvider.AUTHORITY + "/" + BACKUP_TABLE_NAME);
+        public static final Uri BACKUP_CONTENT_URI_ALL = Uri.parse("content://"
+                + LauncherProvider.AUTHORITY + "/" + BACKUP_TABLE_NAME_ALL);
+
+        public static Uri getBackupContentUri() {
+            return MultiModeController.isSingleLayerMode() ? BACKUP_CONTENT_URI_ALL : BACKUP_CONTENT_URI;
+        }
 
         /**
          * The content:// style URL for "favorites_preview" table
          */
         public static final Uri PREVIEW_CONTENT_URI = Uri.parse("content://"
                 + LauncherProvider.AUTHORITY + "/" + PREVIEW_TABLE_NAME);
+        public static final Uri PREVIEW_CONTENT_URI_ALL = Uri.parse("content://"
+                + LauncherProvider.AUTHORITY + "/" + PREVIEW_TABLE_NAME_ALL);
+
+        public static Uri getPreviewContentUri() {
+            return MultiModeController.isSingleLayerMode() ? PREVIEW_CONTENT_URI_ALL : PREVIEW_CONTENT_URI;
+        }
 
         /**
          * The content:// style URL for "favorites_tmp" table
          */
         public static final Uri TMP_CONTENT_URI = Uri.parse("content://"
                 + LauncherProvider.AUTHORITY + "/" + TMP_TABLE);
+        public static final Uri TMP_CONTENT_URI_ALL = Uri.parse("content://"
+                + LauncherProvider.AUTHORITY + "/" + TMP_TABLE_ALL);
+
 
         /**
          * The content:// style URL for a given row, identified by its id.
@@ -203,7 +251,7 @@ public class LauncherSettings {
          */
         public static Uri getContentUri(int id) {
             return Uri.parse("content://" + LauncherProvider.AUTHORITY
-                    + "/" + TABLE_NAME + "/" + id);
+                    + "/" + getFavoritesTableName() + "/" + id);
         }
 
         /**
@@ -339,12 +387,13 @@ public class LauncherSettings {
         public static final String APPWIDGET_SOURCE = "appWidgetSource";
 
         public static void addTableToDb(SQLiteDatabase db, long myProfileId, boolean optional) {
+            addTableToDb(db, myProfileId, optional, TABLE_NAME_ALL);
             addTableToDb(db, myProfileId, optional, TABLE_NAME);
         }
 
         public static void addTableToDb(SQLiteDatabase db, long myProfileId, boolean optional,
                 String tableName) {
-            String ifNotExists = optional ? " IF NOT EXISTS " : "";
+            String ifNotExists = " IF NOT EXISTS ";
             db.execSQL("CREATE TABLE " + ifNotExists + tableName + " (" +
                     "_id INTEGER PRIMARY KEY," +
                     "title TEXT," +
