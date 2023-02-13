@@ -56,6 +56,18 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
 
     private final List<Pair<ItemInfo, Object>> mItemList;
 
+
+    private boolean mAnimated = true;
+
+    public AddWorkspaceItemsTask(List<Pair<ItemInfo, Object>> itemList, boolean ignoreLoaded) {
+        this(itemList);
+        mIgnoreLoaded = ignoreLoaded;
+    }
+
+    public void setEnableAnimated(boolean animated) {
+        mAnimated = animated;
+    }
+
     /**
      * @param itemList items to add on the workspace
      */
@@ -86,7 +98,7 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                     }
 
                     // b/139663018 Short-circuit this logic if the icon is a system app
-                    if (PackageManagerHelper.isSystemApp(app.getContext(), item.getIntent())) {
+                    if (PackageManagerHelper.isSystemApp(app.getContext(), item.getIntent()) && !mIgnoreLoaded) {
                         continue;
                     }
                 }

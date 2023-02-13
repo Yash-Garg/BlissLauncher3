@@ -32,6 +32,8 @@ import com.android.launcher3.model.ItemInstallQueue;
 import com.android.launcher3.pm.InstallSessionHelper;
 import com.android.launcher3.util.Executors;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * BroadcastReceiver to handle session commit intent.
  */
@@ -65,7 +67,7 @@ public class SessionCommitReceiver extends BroadcastReceiver {
         InstallSessionHelper packageInstallerCompat = InstallSessionHelper.INSTANCE.get(context);
         packageInstallerCompat.restoreDbIfApplicable(info);
         if (TextUtils.isEmpty(info.getAppPackageName())
-                || info.getInstallReason() != PackageManager.INSTALL_REASON_USER
+                || (info.getInstallReason() != PackageManager.INSTALL_REASON_USER && !isSingleLayer())
                 || packageInstallerCompat.promiseIconAddedForId(info.getSessionId())) {
             packageInstallerCompat.removePromiseIconId(info.getSessionId());
             return;
@@ -81,6 +83,11 @@ public class SessionCommitReceiver extends BroadcastReceiver {
     }
 
     public static boolean isEnabled(Context context) {
-        return Utilities.getPrefs(context).getBoolean(ADD_ICON_PREFERENCE_KEY, true);
+        return Utilities.getPrefs(context).getBoolean(ADD_ICON_PREFERENCE_KEY, true)
+                || isSingleLayer();
+    }
+
+    public static boolean isSingleLayer() {
+        return MultiModeController.isSingleLayerMode();
     }
 }

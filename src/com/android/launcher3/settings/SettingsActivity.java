@@ -40,6 +40,7 @@ import androidx.preference.PreferenceFragmentCompat.OnPreferenceStartFragmentCal
 import androidx.preference.PreferenceFragmentCompat.OnPreferenceStartScreenCallback;
 import androidx.preference.PreferenceGroup.PreferencePositionCallback;
 import androidx.preference.PreferenceScreen;
+import androidx.preference.SwitchPreference;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.launcher3.DeviceProfile;
@@ -56,6 +57,9 @@ import com.android.launcher3.uioverrides.plugins.PluginManagerWrapper;
 
 import java.util.Collections;
 import java.util.List;
+
+import foundation.e.bliss.multimode.MultiModeController;
+import foundation.e.bliss.preferences.BlissPrefs;
 
 /**
  * Settings activity for Launcher. Currently implements the following setting: Allow rotation
@@ -289,6 +293,12 @@ public class SettingsActivity extends FragmentActivity
                         });
                         return true;
                     });
+                    return true;
+
+                case BlissPrefs.PREF_SINGLE_LAYER_MODE:
+                    boolean isSingleLayer = MultiModeController.isSingleLayerMode();
+                    preference.setDefaultValue(isSingleLayer);
+                    ((SwitchPreference) preference).setChecked(isSingleLayer);
                     return true;
             }
 

@@ -337,7 +337,7 @@ public class LoaderTask implements Runnable {
     }
 
     private void loadWorkspace(List<ShortcutInfo> allDeepShortcuts, LoaderMemoryLogger logger) {
-        loadWorkspace(allDeepShortcuts, LauncherSettings.Favorites.CONTENT_URI,
+        loadWorkspace(allDeepShortcuts, LauncherSettings.Favorites.getContentUri(),
                 null /* selection */, logger);
     }
 

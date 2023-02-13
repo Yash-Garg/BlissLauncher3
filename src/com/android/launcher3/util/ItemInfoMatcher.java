@@ -27,6 +27,7 @@ import com.android.launcher3.shortcuts.ShortcutKey;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * A utility class to check for {@link ItemInfo}
@@ -79,6 +80,12 @@ public interface ItemInfoMatcher {
 
     static ItemInfoMatcher ofComponents(HashSet<ComponentName> components, UserHandle user) {
         return (info, cn) -> components.contains(cn) && info.user.equals(user);
+    }
+
+    static Predicate<ItemInfo> ofComponentsPredicate(
+            HashSet<ComponentName> components, UserHandle user) {
+        return info -> info != null && info.user.equals(user)
+                && components.contains(info);
     }
 
     static ItemInfoMatcher ofPackages(Set<String> packageNames, UserHandle user) {

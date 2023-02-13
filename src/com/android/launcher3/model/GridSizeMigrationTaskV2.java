@@ -170,12 +170,12 @@ public class GridSizeMigrationTaskV2 {
                 LauncherSettings.Settings.EXTRA_VALUE)) {
 
             DbReader srcReader = new DbReader(t.getDb(),
-                    migrateForPreview ? LauncherSettings.Favorites.TABLE_NAME
-                            : LauncherSettings.Favorites.TMP_TABLE,
+                    migrateForPreview ? LauncherSettings.Favorites.getFavoritesTableName()
+                            : LauncherSettings.Favorites.getTempTableName(),
                     context, validPackages);
             DbReader destReader = new DbReader(t.getDb(),
-                    migrateForPreview ? LauncherSettings.Favorites.PREVIEW_TABLE_NAME
-                            : LauncherSettings.Favorites.TABLE_NAME,
+                    migrateForPreview ? LauncherSettings.Favorites.getPreviewTableName()
+                            : LauncherSettings.Favorites.getFavoritesTableName(),
                     context, validPackages);
 
             Point targetSize = new Point(idp.numColumns, idp.numRows);
@@ -184,7 +184,7 @@ public class GridSizeMigrationTaskV2 {
             task.migrate(idp);
 
             if (!migrateForPreview) {
-                dropTable(t.getDb(), LauncherSettings.Favorites.TMP_TABLE);
+                dropTable(t.getDb(), LauncherSettings.Favorites.getTempTableName());
             }
 
             t.commit();

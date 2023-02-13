@@ -171,7 +171,7 @@ public class PreviewSurfaceRenderer {
                         query += " or " + LauncherSettings.Favorites.SCREEN + " = "
                                 + Workspace.SECOND_SCREEN_ID;
                     }
-                    loadWorkspace(new ArrayList<>(), LauncherSettings.Favorites.PREVIEW_CONTENT_URI,
+                    loadWorkspace(new ArrayList<>(), LauncherSettings.Favorites.getPreviewContentUri(),
                             query);
 
                     MAIN_EXECUTOR.execute(() -> {

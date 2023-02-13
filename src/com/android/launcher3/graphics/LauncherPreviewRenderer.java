@@ -104,6 +104,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import foundation.e.bliss.LauncherAppMonitor;
+
 /**
  * Utility class for generating the preview of Launcher for a given InvariantDeviceProfile.
  * Steps:
@@ -129,12 +131,13 @@ public class LauncherPreviewRenderer extends ContextWrapper
         public PreviewContext(Context base, InvariantDeviceProfile idp) {
             super(base, UserCache.INSTANCE, InstallSessionHelper.INSTANCE,
                     LauncherAppState.INSTANCE, InvariantDeviceProfile.INSTANCE,
-                    CustomWidgetManager.INSTANCE, PluginManagerWrapper.INSTANCE);
+                    CustomWidgetManager.INSTANCE, PluginManagerWrapper.INSTANCE,
+                    LauncherAppMonitor.INSTANCE);
             mIdp = idp;
             mObjectMap.put(InvariantDeviceProfile.INSTANCE, idp);
             mObjectMap.put(LauncherAppState.INSTANCE,
                     new LauncherAppState(this, null /* iconCacheFileName */));
-
+            mObjectMap.put(LauncherAppMonitor.INSTANCE, new LauncherAppMonitor(this));
         }
 
         public LauncherIcons newLauncherIcons(Context context, boolean shapeDetection) {
