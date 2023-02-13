@@ -15,7 +15,7 @@
  */
 package com.android.launcher3.hybridhotseat;
 
-import static com.android.launcher3.LauncherSettings.Favorites.HYBRID_HOTSEAT_BACKUP_TABLE;
+import static com.android.launcher3.LauncherSettings.Favorites.getHotseatBackupTableName;
 import static com.android.launcher3.provider.LauncherDbUtils.tableExists;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
 
@@ -46,7 +46,7 @@ public class HotseatRestoreHelper {
                 GridBackupTable backupTable = new GridBackupTable(context,
                         transaction.getDb(), idp.numDatabaseHotseatIcons, idp.numColumns,
                         idp.numRows);
-                backupTable.createCustomBackupTable(HYBRID_HOTSEAT_BACKUP_TABLE);
+                backupTable.createCustomBackupTable(getHotseatBackupTableName());
                 transaction.commit();
                 LauncherSettings.Settings.call(context.getContentResolver(),
                         LauncherSettings.Settings.METHOD_REFRESH_HOTSEAT_RESTORE_TABLE);
@@ -64,14 +64,14 @@ public class HotseatRestoreHelper {
                             context.getContentResolver(),
                             LauncherSettings.Settings.METHOD_NEW_TRANSACTION)
                             .getBinder(LauncherSettings.Settings.EXTRA_VALUE)) {
-                if (!tableExists(transaction.getDb(), HYBRID_HOTSEAT_BACKUP_TABLE)) {
+                if (!tableExists(transaction.getDb(), getHotseatBackupTableName())) {
                     return;
                 }
                 InvariantDeviceProfile idp = LauncherAppState.getIDP(context);
                 GridBackupTable backupTable = new GridBackupTable(context,
                         transaction.getDb(), idp.numDatabaseHotseatIcons, idp.numColumns,
                         idp.numRows);
-                backupTable.restoreFromCustomBackupTable(HYBRID_HOTSEAT_BACKUP_TABLE, true);
+                backupTable.restoreFromCustomBackupTable(getHotseatBackupTableName(), true);
                 transaction.commit();
                 LauncherAppState.getInstance(context).getModel().forceReload();
             }

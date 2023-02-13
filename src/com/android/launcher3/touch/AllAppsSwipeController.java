@@ -42,6 +42,8 @@ import com.android.launcher3.LauncherState;
 import com.android.launcher3.anim.Interpolators;
 import com.android.launcher3.states.StateAnimationConfig;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * TouchController to switch between NORMAL and ALL_APPS state.
  */
@@ -139,6 +141,9 @@ public class AllAppsSwipeController extends AbstractStateChangeTouchController {
 
     @Override
     protected boolean canInterceptTouch(MotionEvent ev) {
+        if (MultiModeController.isSingleLayerMode()) {
+            return false;
+        }
         if (mCurrentAnimation != null) {
             // If we are already animating from a previous state, we can intercept.
             return true;
