@@ -6,6 +6,12 @@ plugins {
     alias libs.plugins.android.library apply false
     alias libs.plugins.kotlin
     alias libs.plugins.google.protobuf
+    id "foundation.e.bliss.spotless"
+    id "foundation.e.bliss.githooks"
+}
+
+afterEvaluate {
+    tasks.prepareKotlinBuildScriptModel.dependsOn(tasks.copyGitHooks, tasks.installGitHooks)
 }
 
 allprojects {
