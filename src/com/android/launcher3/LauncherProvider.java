@@ -925,8 +925,13 @@ public class LauncherProvider extends ContentProvider {
                 return;
             }
             final IntSet validWidgets = IntSet.wrap(LauncherDbUtils.queryIntArray(false, db,
-                    Favorites.getFavoritesTableName(), Favorites.APPWIDGET_ID,
+                    Favorites.TABLE_NAME, Favorites.APPWIDGET_ID,
                     "itemType=" + Favorites.ITEM_TYPE_APPWIDGET, null, null));
+
+            validWidgets.addAll(IntSet.wrap(LauncherDbUtils.queryIntArray(false, db,
+                    Favorites.TABLE_NAME_ALL, Favorites.APPWIDGET_ID,
+                    "itemType=" + Favorites.ITEM_TYPE_APPWIDGET, null, null)));
+
             for (int widgetId : allWidgets) {
                 if (!validWidgets.contains(widgetId)) {
                     try {
