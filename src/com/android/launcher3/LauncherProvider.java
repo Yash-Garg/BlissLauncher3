@@ -561,6 +561,8 @@ public class LauncherProvider extends ContentProvider {
                 mOpenHelper.loadFavorites(mOpenHelper.getWritableDatabase(),
                         getDefaultLayoutParser(widgetHost));
             }
+            copyTable(mOpenHelper.getReadableDatabase(), Favorites.TABLE_NAME_ALL,
+                    mOpenHelper.getWritableDatabase(),Favorites.TABLE_NAME, getContext());
             clearFlagEmptyDbCreated();
         }
     }
