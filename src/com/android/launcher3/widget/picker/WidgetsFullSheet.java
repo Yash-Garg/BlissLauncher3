@@ -25,6 +25,7 @@ import static com.android.launcher3.testing.shared.TestProtocol.NORMAL_STATE_ORD
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.PropertyValuesHolder;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.content.res.Configuration;
@@ -35,6 +36,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -49,6 +51,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
@@ -91,6 +94,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
+
+import foundation.e.bliss.widgets.WidgetContainer.WidgetFragment;
 
 /**
  * Popup for showing the full list of available widgets
@@ -208,6 +213,8 @@ public class WidgetsFullSheet extends BaseWidgetSheet
     private @Nullable WidgetsRecyclerView mCurrentTouchEventRecyclerView;
 
     private RecyclerViewFastScroller mFastScroller;
+
+    private static boolean isEditMode = false;
 
     public WidgetsFullSheet(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
@@ -779,10 +786,17 @@ public class WidgetsFullSheet extends BaseWidgetSheet
                         && launcher.getDeviceProfile().isLandscape
                         ? R.layout.widgets_full_sheet_large_screen
                         : R.layout.widgets_full_sheet, launcher.getDragLayer(), false);
+
+        isEditMode = false;
         sheet.attachToContainer();
         sheet.mIsOpen = true;
         sheet.open(animate);
         return sheet;
+    }
+
+    public static WidgetsFullSheet show(Launcher launcher, boolean animate, boolean inEditMode) {
+        isEditMode = inEditMode;
+        return show(launcher, animate);
     }
 
     @Override
@@ -1008,9 +1022,14 @@ public class WidgetsFullSheet extends BaseWidgetSheet
                     context,
                     LayoutInflater.from(context),
                     this::getEmptySpaceHeight,
-                    /* iconClickListener= */ WidgetsFullSheet.this,
-                    /* iconLongClickListener= */ WidgetsFullSheet.this,
+                    /* iconClickListener= */ !isEditMode ? WidgetsFullSheet.this :
+                    v -> WidgetFragment.onWidgetClick(context, v, close -> {
+                        close(close);
+                        return null;
+                    }),
+                    /* iconLongClickListener= */ !isEditMode ? WidgetsFullSheet.this : null,
                     mIsTwoPane ? headerChangeListener : null);
+
             mWidgetsListAdapter.setHasStableIds(true);
             switch (mAdapterType) {
                 case PRIMARY:
