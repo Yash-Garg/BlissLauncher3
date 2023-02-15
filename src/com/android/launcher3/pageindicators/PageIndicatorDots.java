@@ -129,6 +129,10 @@ public class PageIndicatorDots extends View implements PageIndicator {
                 return;
             }
 
+            if (currentScroll == 0) {
+                return;
+            }
+
             int pageToLeft = currentScroll / scrollPerPage;
             int pageToLeftScroll = pageToLeft * scrollPerPage;
             int pageToRightScroll = pageToLeftScroll + scrollPerPage;

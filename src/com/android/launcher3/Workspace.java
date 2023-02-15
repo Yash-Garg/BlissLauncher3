@@ -153,7 +153,7 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
 
     private static final int ADJACENT_SCREEN_DROP_DURATION = 300;
 
-    public static final int DEFAULT_PAGE = 0;
+    public static final int DEFAULT_PAGE = 1;
 
     private static final int DEFAULT_SMARTSPACE_HEIGHT = 1;
 
@@ -226,7 +226,6 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
     private float mXDown;
     private float mYDown;
     private View mQsb;
-    private boolean mIsEventOverQsb;
 
     final static float START_DAMPING_TOUCH_SLOP_ANGLE = (float) Math.PI / 6;
     final static float MAX_SWIPE_ANGLE = (float) Math.PI / 3;
@@ -583,13 +582,12 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
             // In transposed layout, we add the QSB in the Grid. As workspace does not touch the
             // edges, we do not need a full width QSB.
             mQsb = LayoutInflater.from(getContext())
-                    .inflate(R.layout.search_container_workspace, firstPage, false);
+                    .inflate(R.layout.search_container_workspace_v2, firstPage, false);
         }
 
-        int cellVSpan = FeatureFlags.EXPANDED_SMARTSPACE.get()
-                ? EXPANDED_SMARTSPACE_HEIGHT : DEFAULT_SMARTSPACE_HEIGHT;
-        CellLayout.LayoutParams lp = new CellLayout.LayoutParams(0, 0, firstPage.getCountX(),
-                cellVSpan);
+        int cellHSpan = mLauncher.getDeviceProfile().inv.numColumns;
+        int cellVSpan = mLauncher.getDeviceProfile().inv.numRows;
+        CellLayout.LayoutParams lp = new CellLayout.LayoutParams(0, 0, cellHSpan, cellVSpan);
         lp.canReorder = false;
         if (!firstPage.addViewToCellLayout(mQsb, 0, R.id.search_container_workspace, lp, true)) {
             Log.e(TAG, "Failed to add to item at (0, 0) to CellLayout");
@@ -1074,17 +1072,12 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         if (mQsb != null) {
             mTempFXY[0] = mXDown + getScrollX();
             mTempFXY[1] = mYDown + getScrollY();
-            Utilities.mapCoordInSelfToDescendant(mQsb, this, mTempFXY);
-            mIsEventOverQsb = mQsb.getLeft() <= mTempFXY[0] && mQsb.getRight() >= mTempFXY[0]
-                    && mQsb.getTop() <= mTempFXY[1] && mQsb.getBottom() >= mTempFXY[1];
-        } else {
-            mIsEventOverQsb = false;
         }
     }
 
     @Override
     protected void determineScrollingStart(MotionEvent ev) {
-        if (!isFinishedSwitchingState() || mIsEventOverQsb) return;
+        if (!isFinishedSwitchingState()) return;
 
         float deltaX = ev.getX() - mXDown;
         float absDeltaX = Math.abs(deltaX);
@@ -1182,6 +1175,30 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         updatePageAlphaValues();
         updatePageScrollValues();
         enableHwLayersOnVisiblePages();
+        firstPageItemHideHotseat(l);
+    }
+
+    private void firstPageItemHideHotseat(int scrollX) {
+        DeviceProfile grid = mLauncher.getDeviceProfile();
+        int bottomPadding = grid.workspacePadding.bottom;
+
+        final DeviceProfile dp = mLauncher.getDeviceProfile();
+        float progress = (float) scrollX / dp.availableWidthPx;
+
+        if (progress >= 0.999)
+            progress = 1;
+        if (progress <= 0.001)
+            progress = 0;
+
+        int dockHeight = getHotseat().getHeight() + getPageIndicator().getHeight();
+        float dockTranslationY = (1 - progress) * dockHeight;
+
+        float qsbPadding = progress * bottomPadding;
+
+        getHotseat().setTranslationY(dockTranslationY);
+        getPageIndicator().setTranslationY(dockTranslationY);
+        setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
+                progress != 0 ? (int) qsbPadding : getPaddingBottom());
     }
 
     public void showPageIndicatorAtCurrentScroll() {

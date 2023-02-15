@@ -2386,7 +2386,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                     Object tag = v.getTag();
                     String desc = "Collision while binding workspace item: " + item
                             + ". Collides with " + tag;
-                    if (FeatureFlags.IS_STUDIO_BUILD) {
+                    if (FeatureFlags.IS_STUDIO_BUILD && tag != null) {
                         throw (new RuntimeException(desc));
                     } else {
                         Log.d(TAG, desc);
@@ -2762,6 +2762,10 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                         && info.getTargetComponent() != null
                         && TextUtils.equals(info.getTargetComponent().getPackageName(),
                         packageName);
+
+        if (mWorkspace.getDestinationPage() == 0) {
+            return null;
+        }
 
         if (supportsAllAppsState && isInState(LauncherState.ALL_APPS)) {
             return getFirstMatch(Collections.singletonList(mAppsView.getActiveRecyclerView()),

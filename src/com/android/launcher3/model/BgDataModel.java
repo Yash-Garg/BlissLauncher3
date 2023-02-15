@@ -34,7 +34,6 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.LauncherSettings;
-import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.Workspace;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.model.data.AppInfo;
@@ -69,9 +68,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import foundation.e.bliss.LauncherAppMonitor;
-import foundation.e.bliss.db.BlissDbUtils;
-import foundation.e.bliss.multimode.MultiModeController;
+import foundation.e.bliss.utils.BlissDbUtils;
 
 /**
  * All the data stored in-memory and managed by the LauncherModel
