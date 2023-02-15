@@ -74,7 +74,7 @@ public class StatusBarTouchController implements TouchController {
     }
 
     private void dispatchTouchEvent(MotionEvent ev) {
-        if (mSystemUiProxy.isActive()) {
+        if (false) {
             mLastAction = ev.getActionMasked();
             mSystemUiProxy.onStatusBarMotionEvent(ev);
         }

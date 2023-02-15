@@ -25,3 +25,9 @@ debug-db = "com.amitshekhar.android:debug-db:1.0.4"
 #noinspection GradleDependency
 google-material = "com.google.android.material:material:1.6.1"
 google-protobuf-javalite = "com.google.protobuf:protobuf-javalite:3.21.1"
+reactivex-rxkotlin3 = "io.reactivex.rxjava3:rxkotlin:3.0.1"
+
+square-retrofit = "com.squareup.retrofit2:retrofit:2.9.0"
+square-okhttp = "com.squareup.okhttp3:okhttp:4.10.0"
+square-gson = "com.squareup.retrofit2:converter-gson:2.9.0"
+square-logging = "com.squareup.okhttp3:logging-interceptor:4.10.0"

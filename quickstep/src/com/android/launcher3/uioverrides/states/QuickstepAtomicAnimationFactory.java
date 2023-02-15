@@ -77,7 +77,7 @@ public class QuickstepAtomicAnimationFactory extends
     // Scale workspace takes before animating in
     private static final float WORKSPACE_PREPARE_SCALE = 0.92f;
     // Constants to specify how to scroll RecentsView to the default page if it's not already there.
-    private static final int DEFAULT_PAGE = 0;
+    private static final int DEFAULT_PAGE = 1;
     private static final int PER_PAGE_SCROLL_DURATION = 150;
     private static final int MAX_PAGE_SCROLL_DURATION = 750;
 

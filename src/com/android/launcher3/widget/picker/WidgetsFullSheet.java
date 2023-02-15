@@ -24,6 +24,7 @@ import static com.android.launcher3.testing.shared.TestProtocol.NORMAL_STATE_ORD
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.PropertyValuesHolder;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.content.res.Configuration;
@@ -33,6 +34,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -44,6 +46,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -52,6 +55,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherAppState;
+import com.android.launcher3.PendingAddItemInfo;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.anim.PendingAnimation;
@@ -66,6 +70,8 @@ import com.android.launcher3.views.StickyHeaderLayout;
 import com.android.launcher3.views.WidgetsEduView;
 import com.android.launcher3.widget.BaseWidgetSheet;
 import com.android.launcher3.widget.LauncherAppWidgetHost.ProviderChangedListener;
+import com.android.launcher3.widget.PendingAddShortcutInfo;
+import com.android.launcher3.widget.WidgetCell;
 import com.android.launcher3.widget.model.WidgetsListBaseEntry;
 import com.android.launcher3.widget.picker.search.SearchModeListener;
 import com.android.launcher3.widget.picker.search.WidgetsSearchBar;
@@ -77,6 +83,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
+
+import foundation.e.bliss.widgets.WidgetContainer.WidgetFragment;
 
 /**
  * Popup for showing the full list of available widgets
@@ -169,6 +177,8 @@ public class WidgetsFullSheet extends BaseWidgetSheet
     private View mSearchBarContainer;
     private WidgetsSearchBar mSearchBar;
     private TextView mHeaderTitle;
+
+    private static boolean isEditMode = false;
 
     public WidgetsFullSheet(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
@@ -635,10 +645,16 @@ public class WidgetsFullSheet extends BaseWidgetSheet
     public static WidgetsFullSheet show(Launcher launcher, boolean animate) {
         WidgetsFullSheet sheet = (WidgetsFullSheet) launcher.getLayoutInflater()
                 .inflate(R.layout.widgets_full_sheet, launcher.getDragLayer(), false);
+        isEditMode = false;
         sheet.attachToContainer();
         sheet.mIsOpen = true;
         sheet.open(animate);
         return sheet;
+    }
+
+    public static WidgetsFullSheet show(Launcher launcher, boolean animate, boolean inEditMode) {
+        isEditMode = inEditMode;
+        return show(launcher, animate);
     }
 
     /** Gets the {@link WidgetsRecyclerView} which shows all widgets in {@link WidgetsFullSheet}. */
@@ -783,8 +799,11 @@ public class WidgetsFullSheet extends BaseWidgetSheet
                     LayoutInflater.from(context),
                     apps.getIconCache(),
                     this::getEmptySpaceHeight,
-                    /* iconClickListener= */ WidgetsFullSheet.this,
-                    /* iconLongClickListener= */ WidgetsFullSheet.this);
+                    /* iconClickListener= */ !isEditMode ? WidgetsFullSheet.this : v -> WidgetFragment.onWidgetClick(context, v, close -> {
+                                close(close);
+                                return null;
+                            }),
+                    /* iconLongClickListener= */ !isEditMode ? WidgetsFullSheet.this : null);
             mWidgetsListAdapter.setHasStableIds(true);
             switch (mAdapterType) {
                 case PRIMARY:
