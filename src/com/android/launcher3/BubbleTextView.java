@@ -404,7 +404,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         FastBitmapDrawable iconDrawable = info.newIcon(getContext(), flags);
         mDotParams.appColor = iconDrawable.getIconColor();
         mDotParams.dotColor = getContext().getResources()
-                .getColor(android.R.color.system_accent3_200, getContext().getTheme());
+                .getColor(R.color.notification_dot_bg, getContext().getTheme());
         setIcon(iconDrawable);
         applyLabel(info);
     }
@@ -622,7 +622,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             final int scrollX = getScrollX();
             final int scrollY = getScrollY();
             canvas.translate(scrollX, scrollY);
-            mDotRenderer.draw(canvas, mDotParams);
+            mDotParams.leftAlign = true;
+            mDotRenderer.draw(canvas, mDotParams, mDotInfo == null ? -1 : mDotInfo.getNotificationCount());
             canvas.translate(-scrollX, -scrollY);
         }
     }
