@@ -462,7 +462,7 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
                 iconBitmapSize, fillResIconDpi, numDatabaseAllAppsColumns, dbFile};
     }
 
-    private void onConfigChanged(Context context) {
+    public void onConfigChanged(Context context) {
         Object[] oldState = toModelState();
 
         // Re-init grid

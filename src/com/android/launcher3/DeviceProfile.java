@@ -34,6 +34,7 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.view.Surface;
@@ -49,8 +50,10 @@ import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.uioverrides.ApiWrapper;
 import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.DisplayController.Info;
+import com.android.launcher3.util.Themes;
 import com.android.launcher3.util.WindowBounds;
 
+import foundation.e.bliss.multimode.MultiModeController;
 import lineageos.providers.LineageSettings;
 
 import java.io.PrintWriter;
@@ -255,9 +258,9 @@ public class DeviceProfile {
 
     /** TODO: Once we fully migrate to staged split, remove "isMultiWindowMode" */
     DeviceProfile(Context context, InvariantDeviceProfile inv, Info info, WindowBounds windowBounds,
-            SparseArray<DotRenderer> dotRendererCache, boolean isMultiWindowMode,
-            boolean transposeLayoutWithOrientation, boolean useTwoPanels, boolean isGestureMode,
-            @NonNull final ViewScaleProvider viewScaleProvider) {
+                  SparseArray<DotRenderer> dotRendererCache, boolean isMultiWindowMode,
+                  boolean transposeLayoutWithOrientation, boolean useTwoPanels, boolean isGestureMode,
+                  @NonNull final ViewScaleProvider viewScaleProvider) {
 
         this.inv = inv;
         this.isLandscape = windowBounds.isLandscape();
@@ -510,16 +513,27 @@ public class DeviceProfile {
 
         mViewScaleProvider = viewScaleProvider;
 
+        // Check if notification dots should show the notification count
+        boolean showNotificationCount = MultiModeController.isNotifCountEnabled();
+
+        // Load the default font to use on notification dots
+        Typeface typeface = null;
+        if (showNotificationCount) {
+            typeface = Typeface.create(Themes.getDefaultBodyFont(context), Typeface.NORMAL);
+        }
+
         // This is done last, after iconSizePx is calculated above.
-        mDotRendererWorkSpace = createDotRenderer(iconSizePx, dotRendererCache);
-        mDotRendererAllApps = createDotRenderer(allAppsIconSizePx, dotRendererCache);
+        mDotRendererWorkSpace = createDotRenderer(iconSizePx, dotRendererCache, showNotificationCount, typeface);
+        mDotRendererAllApps = createDotRenderer(allAppsIconSizePx, dotRendererCache, showNotificationCount, typeface);
     }
 
     private static DotRenderer createDotRenderer(
-            int size, @NonNull SparseArray<DotRenderer> cache) {
+            int size, @NonNull SparseArray<DotRenderer> cache,
+            boolean showNotificationCount, Typeface typeface) {
         DotRenderer renderer = cache.get(size);
         if (renderer == null) {
-            renderer = new DotRenderer(size, getShapePath(DEFAULT_DOT_SIZE), DEFAULT_DOT_SIZE);
+            renderer = new DotRenderer(size, getShapePath(DEFAULT_DOT_SIZE),
+                    DEFAULT_DOT_SIZE, showNotificationCount, typeface);
             cache.put(size, renderer);
         }
         return renderer;

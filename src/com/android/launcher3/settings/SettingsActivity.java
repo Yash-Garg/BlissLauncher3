@@ -314,6 +314,12 @@ public class SettingsActivity extends FragmentActivity
                     preference.setDefaultValue(isSingleLayer);
                     ((SwitchPreference) preference).setChecked(isSingleLayer);
                     return true;
+
+                case BlissPrefs.PREF_NOTIF_COUNT:
+                    boolean showCount = MultiModeController.isNotifCountEnabled();
+                    preference.setDefaultValue(showCount);
+                    ((SwitchPreference) preference).setChecked(showCount);
+                    return true;
             }
 
             return true;
