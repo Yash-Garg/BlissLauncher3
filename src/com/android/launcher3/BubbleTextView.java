@@ -79,6 +79,8 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Locale;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * TextView that draws a bubble behind the text. We cannot use a LineBackgroundSpan
  * because we want to make the bubble taller than the text and TextView's clip is
@@ -376,8 +378,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     protected void applyIconAndLabel(ItemInfoWithIcon info) {
         boolean useTheme = mDisplay == DISPLAY_WORKSPACE || mDisplay == DISPLAY_FOLDER
                 || mDisplay == DISPLAY_TASKBAR;
-        FastBitmapDrawable iconDrawable = info.newIcon(getContext(), useTheme);
-        mDotParams.color = IconPalette.getMutedColor(iconDrawable.getIconColor(), 0.54f);
+        FastBitmapDrawable iconDrawable = info.newIcon(getContext(), useTheme && !MultiModeController.isSingleLayerMode());
+        mDotParams.color = getContext().getColor(R.color.notification_dot_bg);
 
         setIcon(iconDrawable);
         applyLabel(info);
@@ -579,7 +581,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             final int scrollX = getScrollX();
             final int scrollY = getScrollY();
             canvas.translate(scrollX, scrollY);
-            mDotRenderer.draw(canvas, mDotParams);
+            mDotParams.leftAlign = true;
+            mDotRenderer.draw(canvas, mDotParams, mDotInfo == null ? -1 : mDotInfo.getNotificationCount());
             canvas.translate(-scrollX, -scrollY);
         }
     }
