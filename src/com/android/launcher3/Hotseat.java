@@ -17,6 +17,7 @@
 package com.android.launcher3;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -27,17 +28,25 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.function.Consumer;
 
+import foundation.e.bliss.blur.BlurViewDelegate;
+import foundation.e.bliss.blur.OffsetParent;
+import foundation.e.bliss.blur.BlurWallpaperProvider;
+
 /**
  * View class that represents the bottom row of the home screen.
  */
-public class Hotseat extends CellLayout implements Insettable {
+public class Hotseat extends CellLayout implements Insettable, OffsetParent {
 
     // Ratio of empty space, qsb should take up to appear visually centered.
     public static final float QSB_CENTER_FACTOR = .325f;
+    private final OffsetParent.OffsetParentDelegate offsetParentDelegate =
+            new OffsetParent.OffsetParentDelegate();
+    public final BlurViewDelegate mBlurDelegate;
 
     @ViewDebug.ExportedProperty(category = "launcher")
     private boolean mHasVerticalHotseat;
@@ -60,6 +69,8 @@ public class Hotseat extends CellLayout implements Insettable {
         super(context, attrs, defStyle);
 
         mQsb = LayoutInflater.from(context).inflate(R.layout.search_container_hotseat, this, false);
+        mBlurDelegate = new BlurViewDelegate(this, BlurWallpaperProvider.Companion.getBlurConfigDock(), null);
+        setWillNotDraw(false);
         addView(mQsb);
     }
 
@@ -79,11 +90,6 @@ public class Hotseat extends CellLayout implements Insettable {
 
     public void setForcedTranslationY(float translationY){
         super.setTranslationY(translationY);
-    }
-
-    @Override
-    public void setTranslationY(float translationY) {
-       // Thread.dumpStack();
     }
 
     public void resetLayout(boolean hasVerticalHotseat) {
@@ -130,6 +136,10 @@ public class Hotseat extends CellLayout implements Insettable {
         mWorkspace = w;
     }
 
+    public Workspace<?> getWorkspace() {
+        return mWorkspace;
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         // We allow horizontal workspace scrolling from within the Hotseat. We do this by delegating
@@ -141,6 +151,14 @@ public class Hotseat extends CellLayout implements Insettable {
             return mSendTouchToWorkspace;
         }
         return false;
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        if (mBlurDelegate != null) {
+            mBlurDelegate.draw(canvas);
+        }
+        super.onDraw(canvas);
     }
 
     @Override
@@ -228,4 +246,39 @@ public class Hotseat extends CellLayout implements Insettable {
         return mQsb;
     }
 
+    @Override
+    public float getOffsetX() {
+        return getTranslationX();
+    }
+
+    @Override
+    public float getOffsetY() {
+        return getTranslationY();
+    }
+
+    @Override
+    public void setTranslationX(float translationX) {
+        super.setTranslationX(translationX);
+        offsetParentDelegate.notifyOffsetChanged();
+    }
+
+    @Override
+    public void setTranslationY(float translationY) {
+        offsetParentDelegate.notifyOffsetChanged();
+    }
+
+    @Override
+    public void addOnOffsetChangeListener(@NonNull OnOffsetChangeListener listener) {
+        offsetParentDelegate.addOnOffsetChangeListener(listener);
+    }
+
+    @Override
+    public void removeOnOffsetChangeListener(@NonNull OnOffsetChangeListener listener) {
+        offsetParentDelegate.removeOnOffsetChangeListener(listener);
+    }
+
+    @Override
+    public boolean getNeedWallpaperScroll() {
+        return true;
+    }
 }

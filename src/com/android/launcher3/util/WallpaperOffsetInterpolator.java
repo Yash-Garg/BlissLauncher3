@@ -20,6 +20,8 @@ import com.android.launcher3.Utilities;
 import com.android.launcher3.Workspace;
 import com.android.launcher3.anim.Interpolators;
 
+import foundation.e.bliss.blur.BlurWallpaperProvider;
+
 /**
  * Utility class to handle wallpaper scrolling along with workspace.
  */
@@ -213,6 +215,7 @@ public class WallpaperOffsetInterpolator extends BroadcastReceiver {
             // Updating the boolean on a background thread is fine as the assignments are atomic
             mWallpaperIsLiveWallpaper =
                     WallpaperManager.getInstance(context).getWallpaperInfo() != null;
+            BlurWallpaperProvider.Companion.getInstanceNoCreate().updateAsync();
             updateOffset();
         });
     }
@@ -305,6 +308,8 @@ public class WallpaperOffsetInterpolator extends BroadcastReceiver {
         private void setOffsetSafely(IBinder token) {
             try {
                 mWM.setWallpaperOffsets(token, mCurrentOffset, 0.5f);
+                BlurWallpaperProvider.Companion.getInstanceNoCreate()
+                        .setWallpaperOffset(mCurrentOffset);
             } catch (IllegalArgumentException e) {
                 Log.e(TAG, "Error updating wallpaper offset: " + e);
             }
