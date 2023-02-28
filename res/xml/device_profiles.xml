@@ -136,6 +136,14 @@
             launcher:iconTextSize="13.0"
             launcher:canBeDefault="true" />
 
+        <display-option
+            launcher:name="Large Phone"
+            launcher:minWidthDps="406"
+            launcher:minHeightDps="694"
+            launcher:iconImageSize="56"
+            launcher:iconTextSize="12.0"
+            launcher:canBeDefault="true" />
+
     </grid-option>
 
     <grid-option
@@ -148,14 +156,6 @@
         launcher:dbFile="launcher.db"
         launcher:defaultLayoutId="@xml/default_workspace_5x5"
         launcher:deviceCategory="phone|multi_display" >
-
-        <display-option
-            launcher:name="Large Phone"
-            launcher:minWidthDps="406"
-            launcher:minHeightDps="694"
-            launcher:iconImageSize="56"
-            launcher:iconTextSize="12.0"
-            launcher:canBeDefault="true" />
 
         <display-option
             launcher:name="Large Phone Split Display"
