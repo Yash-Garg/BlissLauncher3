@@ -50,6 +50,8 @@ import com.android.launcher3.util.DynamicResource;
 import com.android.launcher3.util.Themes;
 import com.android.systemui.plugins.ResourceProvider;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * View scrim which draws behind hotseat and workspace
  */
@@ -148,7 +150,7 @@ public class SysUiScrim implements View.OnAttachStateChangeListener {
      * Draw the top and bottom scrims
      */
     public void draw(Canvas canvas) {
-        if (!mHideSysUiScrim) {
+        if (!mHideSysUiScrim && !MultiModeController.isSingleLayerMode()) {
             if (mSysUiProgress <= 0) {
                 mAnimateScrimOnNextDraw = false;
                 return;
