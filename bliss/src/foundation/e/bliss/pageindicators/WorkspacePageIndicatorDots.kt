@@ -38,6 +38,11 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         super.onDraw(canvas)
     }
 
+    fun setForcedTranslationY(translationY: Float) {
+        super.setTranslationY(translationY)
+    }
+    override fun setTranslationY(translationY: Float) {}
+
     override fun setInsets(insets: Rect) {
         val grid: DeviceProfile = mLauncher.deviceProfile
 

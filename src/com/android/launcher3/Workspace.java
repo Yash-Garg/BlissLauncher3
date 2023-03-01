@@ -91,6 +91,7 @@ import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.model.data.WorkspaceItemFactory;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.pageindicators.PageIndicator;
+import com.android.launcher3.pageindicators.WorkspacePageIndicator;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StateManager.StateHandler;
 import com.android.launcher3.states.StateAnimationConfig;
@@ -124,6 +125,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import foundation.e.bliss.pageindicators.WorkspacePageIndicatorDots;
 
 /**
  * The workspace is a wide area with a wallpaper and a finite number of pages.
@@ -1177,8 +1180,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
         float qsbPadding = progress * bottomPadding;
 
-        getHotseat().setTranslationY(dockTranslationY);
-        getPageIndicator().setTranslationY(dockTranslationY);
+        getHotseat().setForcedTranslationY(dockTranslationY);
+        ((WorkspacePageIndicatorDots) getPageIndicator()).setForcedTranslationY(dockTranslationY);
         setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
                 progress != 0 ? (int) qsbPadding : getPaddingBottom());
     }
