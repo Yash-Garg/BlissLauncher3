@@ -6,4 +6,9 @@
         <item>foundation.e.pdfviewer</item>
         <item>com.android.stk</item>
     </array>
+
+    <!-- Key | Value string array to force alias -->
+    <string-array name="aliased_apps">
+        <item>com.generalmagic.magicearth</item> <item>@string/maps</item>
+    </string-array>
 </resources>

@@ -10,8 +10,23 @@ package foundation.e.bliss.utils
 import android.content.Context
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import kotlin.Exception
 
 fun hideKeyboard(context: Context, view: View) {
     val inputMethodManager = context.getSystemService(InputMethodManager::class.java)
     inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+}
+
+fun <T> resourcesToMap(array: List<T>): Map<T, T> {
+    val map = mutableMapOf<T, T>()
+
+    if (array.size.mod(2) == 0) {
+        for (i in array.indices step 2) {
+            map[array[i]] = array[i + 1]
+        }
+    } else {
+        throw Exception("Failed to parse array resource")
+    }
+
+    return map
 }
