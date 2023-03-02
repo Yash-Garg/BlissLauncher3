@@ -397,6 +397,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     @UiThread
     private void applyLabel(ItemInfoWithIcon info) {
         if (mShouldShowLabel) {
+            setIncludeFontPadding(false);
+            setCompoundDrawablePadding(0);
             setText(info.title);
         }
         if (info.contentDescription != null) {
