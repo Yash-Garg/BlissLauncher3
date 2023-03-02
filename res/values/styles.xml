@@ -212,7 +212,9 @@
         <item name="disabledIconAlpha">.54</item>
     </style>
 
-    <style name="BaseIconRoot" parent="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle"/>
+    <style name="BaseIconRoot" parent="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle">
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
+    </style>
 
     <style name="BaseIconUnBounded" parent="BaseIconRoot">
         <item name="android:layout_width">match_parent</item>
@@ -275,7 +277,9 @@
 
     <style name="DropTargetButton" parent="DropTargetButtonBase" />
 
-    <style name="TextHeadline" parent="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle" />
+    <style name="TextHeadline" parent="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle">
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
+    </style>
 
     <style name="PrimaryHeadline" parent="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle"/>
 
