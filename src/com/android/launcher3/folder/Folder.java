@@ -111,6 +111,7 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import foundation.e.bliss.folder.GridFolder;
 import foundation.e.bliss.multimode.MultiModeController;
 
 /**
@@ -303,6 +304,11 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
     public boolean onLongClick(View v) {
         // Return if global dragging is not enabled
         if (!mLauncherDelegate.isDraggingEnabled()) return true;
+        Launcher launcher = mLauncherDelegate.getLauncher();
+        if (MultiModeController.isSingleLayerMode() && launcher != null
+                && !launcher.getWorkspace().isWobbling()) {
+            launcher.getWorkspace().wobbleLayouts(true);
+        }
         return startDrag(v, new DragOptions());
     }
 

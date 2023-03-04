@@ -618,7 +618,12 @@ public class Launcher extends StatefulActivity<LauncherState>
             return topView;
         }
 
-        // #4 state handler
+        // #4 Cancel Wobble
+        if (getWorkspace().isWobbling()) {
+            return getWorkspace();
+        }
+
+        // #5 state handler
         return new OnBackPressedHandler() {
             @Override
             public void onBackInvoked() {
