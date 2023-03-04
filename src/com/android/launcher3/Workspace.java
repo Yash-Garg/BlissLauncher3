@@ -62,6 +62,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -129,10 +131,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import foundation.e.bliss.LauncherAppMonitor;
+import foundation.e.bliss.LauncherAppMonitorCallback;
+import foundation.e.bliss.folder.GridFolder;
+import foundation.e.bliss.multimode.MultiModeController;
 import foundation.e.bliss.pageindicators.WorkspacePageIndicatorDots;
 
 /**
@@ -143,7 +150,8 @@ import foundation.e.bliss.pageindicators.WorkspacePageIndicatorDots;
 public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         implements DropTarget, DragSource, View.OnTouchListener,
         DragController.DragListener, Insettable, StateHandler<LauncherState>,
-        WorkspaceLayoutManager, LauncherBindableItemsContainer {
+        WorkspaceLayoutManager, LauncherBindableItemsContainer,
+        OnAlarmListener {
 
     /** The value that {@link #mTransitionProgress} must be greater than for
      * {@link #transitionStateShouldAllowDrop()} to return true. */
@@ -273,6 +281,13 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
     private final StatsLogManager mStatsLogManager;
 
     private final ValueAnimator navbarAnimator;
+    private boolean isWobbling = false;
+    private ItemInfo mDragObjectInfo;
+    private Animation mWobbleAnimation;
+    private Animation mReverseWobbleAnimation;
+
+    private Alarm wobbleExpireAlarm = new Alarm();
+    public static final int WOBBLE_EXPIRATION_TIMEOUT = 25000;
 
     /**
      * Used to inflate the Workspace from XML.
@@ -309,7 +324,21 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         setMotionEventSplittingEnabled(true);
         setOnTouchListener(new WorkspaceTouchListener(mLauncher, this));
         mStatsLogManager = StatsLogManager.newInstance(context);
+        wobbleExpireAlarm.setOnAlarmListener(this);
+        mWobbleAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.wobble);
+        mReverseWobbleAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.wobble_reverse);
+        LauncherAppMonitor.getInstance(context).registerCallback(mLauncherAppMonitorCallback);
     }
+
+    private final LauncherAppMonitorCallback mLauncherAppMonitorCallback =
+            new LauncherAppMonitorCallback() {
+                @Override
+                public void onReceiveHomeIntent() {
+                    if (isWobbling() && Folder.getOpen(mLauncher) == null) {
+                        wobbleLayouts(false);
+                    }
+                }
+            };
 
     @Override
     public void setInsets(Rect insets) {
@@ -444,6 +473,7 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         if (ENFORCE_DRAG_EVENT_ORDER) {
             enforceDragParity("onDragStart", 0, 0);
         }
+        mDragObjectInfo = dragObject.dragInfo;
 
         if (mDragInfo != null && mDragInfo.cell != null) {
             CellLayout layout = (CellLayout) (mDragInfo.cell instanceof LauncherAppWidgetHostView
@@ -524,6 +554,10 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
 
         mDragInfo = null;
         mDragSourceInternal = null;
+        mDragObjectInfo = null;
+        if (isWobbling()) {
+            wobbleLayouts(true);
+        }
     }
 
     /**
@@ -1663,9 +1697,14 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
     }
 
     public void startDrag(CellLayout.CellInfo cellInfo, DragOptions options) {
+        if (!isWobbling() && MultiModeController.isSingleLayerMode()) {
+            wobbleLayouts(true);
+        }
+
         View child = cellInfo.cell;
 
         mDragInfo = cellInfo;
+        child.clearAnimation();
         child.setVisibility(INVISIBLE);
 
         if (options.isAccessibleDrag) {
@@ -1752,10 +1791,14 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         }
 
         if (child instanceof BubbleTextView && !dragOptions.isAccessibleDrag) {
-            PopupContainerWithArrow<Launcher> popupContainer = PopupContainerWithArrow
-                    .showForIcon((BubbleTextView) child);
-            if (popupContainer != null) {
-                dragOptions.preDragCondition = popupContainer.createPreDragCondition(true);
+            if (MultiModeController.isSingleLayerMode()) {
+                dragOptions.preDragCondition = createWobblePreDragCondition();
+            } else {
+                PopupContainerWithArrow<Launcher> popupContainer = PopupContainerWithArrow
+                        .showForIcon((BubbleTextView) child);
+                if (popupContainer != null) {
+                    dragOptions.preDragCondition = popupContainer.createPreDragCondition(true);
+                }
             }
         }
 
@@ -1791,6 +1834,23 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
                     dragOptions);
         }
         return dv;
+    }
+
+    public DragOptions.PreDragCondition createWobblePreDragCondition() {
+        return new DragOptions.PreDragCondition() {
+            @Override
+            public boolean shouldStartDrag(double distanceDragged) {
+                return true;
+            }
+
+            @Override
+            public void onPreDragStart(DropTarget.DragObject dragObject) {
+            }
+
+            @Override
+            public void onPreDragEnd(DropTarget.DragObject dragObject, boolean dragStarted) {
+            }
+        };
     }
 
     private boolean transitionStateShouldAllowDrop() {
@@ -1935,6 +1995,9 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         if (distance > target.getFolderCreationRadius(targetCell)) return false;
         View v = target.getChildAt(targetCell[0], targetCell[1]);
 
+        if (v instanceof BubbleTextView || v instanceof Folder) {
+            v.clearAnimation();
+        }
         boolean hasntMoved = false;
         if (mDragInfo != null) {
             CellLayout cellParent = getParentCellLayoutForView(mDragInfo.cell);
@@ -2484,6 +2547,9 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
             float targetCellDistance = mDragTargetLayout.getDistanceFromWorkspaceCellVisualCenter(
                     mDragViewVisualCenter[0], mDragViewVisualCenter[1], mTargetCell);
 
+            if (isWobbling() && child != null) {
+                child.clearAnimation();
+            }
             manageFolderFeedback(targetCellDistance, d);
 
             boolean nearestDropOccupied = mDragTargetLayout.isNearestDropLocationOccupied((int)
@@ -2645,6 +2711,20 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         }
         if (mDragMode == DRAG_MODE_CREATE_FOLDER && !userFolderPending) {
             setDragMode(DRAG_MODE_NONE);
+        }
+    }
+
+    @Override
+    public void onAlarm(Alarm alarm) {
+        if (alarm == wobbleExpireAlarm) {
+            wobbleLayouts(false);
+        }
+    }
+
+    @Override
+    public void onBackInvoked() {
+        if (isWobbling()) {
+            wobbleLayouts(false);
         }
     }
 
@@ -3264,6 +3344,9 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
                 ItemInfo info = (ItemInfo) child.getTag();
 
                 if (matcher.matchesInfo(info)) {
+                    if (isWobbling()) {
+                        child.clearAnimation();
+                    }
                     layout.removeViewInLayout(child);
                     if (child instanceof DropTarget) {
                         mDragController.removeDropTarget((DropTarget) child);
@@ -3275,8 +3358,9 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
                             .collect(Collectors.toList());
                     if (!matches.isEmpty()) {
                         folderInfo.removeAll(matches, false);
-                        if (((FolderIcon) child).getFolder().isOpen()) {
-                            ((FolderIcon) child).getFolder().close(false /* animate */);
+                        Folder folder = ((FolderIcon) child).getFolder();
+                        if (!(folder instanceof GridFolder) && folder.isOpen()) {
+                            folder.close(false /* animate */);
                         }
                     }
                 }
@@ -3455,6 +3539,80 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
             return getContext().getString(R.string.home_screen);
         }
         return getContext().getString(R.string.workspace_scroll_format, page + 1, nScreens);
+    }
+
+    public boolean isWobbling() {
+        return isWobbling;
+    }
+
+    public void wobbleLayouts(boolean wobble) {
+        wobbleLayouts(wobble, false);
+    }
+    public void wobbleLayouts(boolean wobble, boolean excludeDraggingView) {
+        if (!MultiModeController.isSingleLayerMode()) return;
+
+        isWobbling = wobble;
+        if (wobble) {
+            AtomicInteger index = new AtomicInteger();
+
+            mapOverItems((info, view) -> {
+                view.setLayerType(LAYER_TYPE_HARDWARE, null);
+                if (excludeDraggingView && mDragObjectInfo != null) {
+                    if (mDragObjectInfo instanceof WorkspaceItemInfo
+                            && mDragObjectInfo.equals(view.getTag())) {
+                        return false;
+                    }
+                }
+                index.getAndIncrement();
+                if (view instanceof BubbleTextView || view instanceof FolderIcon) {
+                    if (index.get() % 2 == 0) {
+                        view.startAnimation(getWobbleAnimation());
+                    } else {
+                        view.startAnimation(getReverseWobbleAnimation());
+                    }
+                }
+                if (view instanceof BubbleTextView) {
+                    ((BubbleTextView) view).applyUninstallIconState(true);
+                }
+                return false;
+            });
+            wobbleExpireAlarm.setAlarm(WOBBLE_EXPIRATION_TIMEOUT);
+        } else {
+            wobbleExpireAlarm.cancelAlarm();
+            mapOverItems((info, view) -> {
+                view.setLayerType(LAYER_TYPE_NONE, null);
+                view.clearAnimation();
+                if (view instanceof BubbleTextView) {
+                    ((BubbleTextView) view).applyUninstallIconState(false);
+                } else if (view instanceof FolderIcon) {
+                    Folder folder = ((FolderIcon) view).getFolder();
+                    if (folder instanceof GridFolder && ((GridFolder) folder).isFolderWobbling()) {
+                        ((GridFolder) folder).wobbleFolder(false);
+                    }
+                }
+                return false;
+            });
+        }
+    }
+
+    public ItemInfo getDragObjectInfo() {
+        return mDragObjectInfo;
+    }
+
+    public Animation getWobbleAnimation() {
+        return mWobbleAnimation;
+    }
+
+    public Animation getReverseWobbleAnimation() {
+        return mReverseWobbleAnimation;
+    }
+
+    @Override
+    public void addInScreen(View child, int container, int screenId, int x, int y, int spanX, int spanY) {
+        WorkspaceLayoutManager.super.addInScreen(child, container, screenId, x, y, spanX, spanY);
+        if (isWobbling()) {
+            wobbleLayouts(true, true);
+        }
     }
 
     /**

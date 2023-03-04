@@ -40,6 +40,8 @@ import com.android.launcher3.views.BaseDragLayer;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import foundation.e.bliss.folder.GridFolder;
+
 /**
  * Wrapper around Launcher methods to allow folders in non-launcher context
  */
@@ -100,6 +102,8 @@ public class LauncherDelegate {
                     }
 
                     // Remove the folder
+                    folder.mFolderIcon.clearAnimation();
+
                     mLauncher.removeItem(folder.mFolderIcon, info, true /* deleteFromDb */);
                     if (folder.mFolderIcon instanceof DropTarget) {
                         folder.mDragController.removeDropTarget((DropTarget) folder.mFolderIcon);
@@ -113,6 +117,10 @@ public class LauncherDelegate {
 
                         // Focus the newly created child
                         newIcon.requestFocus();
+
+                        if (mLauncher.getWorkspace().isWobbling()) {
+                            mLauncher.getWorkspace().wobbleLayouts(true);
+                        }
                     }
                     if (finalItem != null) {
                         StatsLogger logger = mLauncher.getStatsLogManager().logger()

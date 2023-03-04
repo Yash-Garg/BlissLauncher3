@@ -46,6 +46,7 @@ import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
+import com.android.launcher3.Workspace;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.lineage.trust.db.TrustDatabaseHelper;
@@ -69,6 +70,8 @@ import com.android.launcher3.widget.PendingAppWidgetHostView;
 import com.android.launcher3.widget.WidgetAddFlowHandler;
 import com.android.launcher3.widget.WidgetManagerHelper;
 
+import foundation.e.bliss.folder.GridFolder;
+
 /**
  * Class for handling clicks on workspace and all-apps items
  */
@@ -87,18 +90,33 @@ public class ItemClickHandler {
         if (v.getWindowToken() == null) return;
 
         Launcher launcher = Launcher.getLauncher(v.getContext());
+        final Workspace workspace = launcher.getWorkspace();
         if (!launcher.getWorkspace().isFinishedSwitchingState()) return;
+
+        if (v instanceof BubbleTextView) {
+            if (((BubbleTextView) v).tryToHandleUninstallClick(launcher)) {
+                return;
+            }
+        }
 
         Object tag = v.getTag();
         if (tag instanceof WorkspaceItemInfo) {
-            onClickAppShortcut(v, (WorkspaceItemInfo) tag, launcher);
-        } else if (tag instanceof FolderInfo) {
-            if (v instanceof FolderIcon) {
-                onClickFolderIcon(v);
+            Folder folder = Folder.getOpen(launcher);
+            if (folder instanceof GridFolder && ((GridFolder) folder).isFolderWobbling()) {
+                ((GridFolder) folder).wobbleFolder(false);
+            } else if (workspace.isWobbling()) {
+                workspace.wobbleLayouts(false);
+            } else {
+                onClickAppShortcut(v, (WorkspaceItemInfo) tag, launcher);
             }
+        } else if (tag instanceof FolderInfo) {
+            onClickFolderIcon(v);
         } else if (tag instanceof AppInfo) {
-            startAppShortcutOrInfoActivity(v, (AppInfo) tag, launcher
-            );
+            if (workspace.isWobbling()) {
+                workspace.wobbleLayouts(false);
+            } else {
+                startAppShortcutOrInfoActivity(v, (AppInfo) tag, launcher);
+            }
         } else if (tag instanceof LauncherAppWidgetInfo) {
             if (v instanceof PendingAppWidgetHostView) {
                 onClickPendingWidget((PendingAppWidgetHostView) v, launcher);

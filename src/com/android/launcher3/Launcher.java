@@ -2035,6 +2035,10 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             return;
         }
 
+        if (getWorkspace().isWobbling()) {
+            return;
+        }
+
         // Note: There should be at most one log per method call. This is enforced implicitly
         // by using if-else statements.
         AbstractFloatingView topView = AbstractFloatingView.getTopOpenView(this);

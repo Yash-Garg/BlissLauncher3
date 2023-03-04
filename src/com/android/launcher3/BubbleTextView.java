@@ -18,14 +18,23 @@ package com.android.launcher3;
 
 import static com.android.launcher3.InvariantDeviceProfile.KEY_SHOW_DESKTOP_LABELS;
 import static com.android.launcher3.InvariantDeviceProfile.KEY_SHOW_DRAWER_LABELS;
+import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER;
 import static com.android.launcher3.config.FeatureFlags.ENABLE_ICON_LABEL_AUTO_SCALING;
 import static com.android.launcher3.graphics.PreloadIconDrawable.newPendingIcon;
 import static com.android.launcher3.icons.GraphicsUtils.setColorAlphaBound;
+import static com.android.launcher3.util.PackageManagerHelper.isSystemApp;
+import static com.android.launcher3.util.ShortcutUtil.getShortcutIdIfPinnedShortcut;
+import static com.android.launcher3.util.ShortcutUtil.isDeepShortcut;
+
+import static foundation.e.bliss.utils.BlissUtilsKt.getUninstallTarget;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
@@ -37,10 +46,12 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.icu.text.MessageFormat;
+import android.net.Uri;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Property;
 import android.util.TypedValue;
 import android.view.KeyEvent;
@@ -54,6 +65,8 @@ import androidx.annotation.UiThread;
 
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
 import com.android.launcher3.dot.DotInfo;
+import com.android.launcher3.dragndrop.DragController;
+import com.android.launcher3.dragndrop.DragOptions;
 import com.android.launcher3.dragndrop.DraggableView;
 import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.graphics.IconPalette;
@@ -75,11 +88,15 @@ import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.BubbleTextHolder;
 import com.android.launcher3.views.IconLabelDotView;
 
+import java.net.URISyntaxException;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Locale;
 
 import foundation.e.bliss.multimode.MultiModeController;
+
+import foundation.e.bliss.LauncherAppMonitor;
+import foundation.e.bliss.wobble.UninstallButtonRenderer;
 
 /**
  * TextView that draws a bubble behind the text. We cannot use a LineBackgroundSpan
@@ -87,7 +104,7 @@ import foundation.e.bliss.multimode.MultiModeController;
  * too aggressive.
  */
 public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
-        IconLabelDotView, DraggableView, Reorderable {
+        IconLabelDotView, DraggableView, Reorderable, DragController.DragListener {
 
     private static final int DISPLAY_WORKSPACE = 0;
     private static final int DISPLAY_ALL_APPS = 1;
@@ -110,6 +127,15 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     private final PointF mTranslationForMoveFromCenterAnimation = new PointF(0, 0);
 
     private float mScaleForReorderBounce = 1f;
+
+    private int mStartDragThreshold;
+
+    private UninstallButtonRenderer mUninstallButtonRenderer;
+
+    private int touchX = 0;
+    private int touchY = 0;
+
+    public boolean isUninstallVisible = false;
 
     private static final Property<BubbleTextView, Float> DOT_SCALE_PROPERTY
             = new Property<BubbleTextView, Float>(Float.TYPE, "dotScale") {
@@ -179,6 +205,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     private boolean mEnableIconUpdateAnimation = false;
     private BubbleTextHolder mBubbleTextHolder;
 
+    private Launcher mLauncher;
+
     public BubbleTextView(Context context) {
         this(context, null, 0);
     }
@@ -190,6 +218,9 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     public BubbleTextView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mActivity = ActivityContext.lookupContext(context);
+        mLauncher = LauncherAppMonitor.getInstanceNoCreate().getLauncher();
+
+        mLauncher.getDragController().addDragListener(this);
 
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.BubbleTextView, defStyle, 0);
@@ -242,6 +273,10 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         mLongPressHelper = new CheckLongPressHelper(this);
 
         mDotParams = new DotRenderer.DrawParams();
+        mUninstallButtonRenderer = new UninstallButtonRenderer(getContext(), mActivity.getDeviceProfile().iconSizePx);
+
+        mStartDragThreshold = getResources().getDimensionPixelSize(
+                R.dimen.deep_shortcuts_start_drag_threshold);
 
         setEllipsize(TruncateAt.END);
         setAccessibilityDelegate(mActivity.getAccessibilityDelegate());
@@ -430,9 +465,13 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         // ignore events if they happen in padding area
-        if (event.getAction() == MotionEvent.ACTION_DOWN
-                && shouldIgnoreTouchDown(event.getX(), event.getY())) {
-            return false;
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            touchX = (int) event.getX();
+            touchY = (int) event.getY();
+            // ignore events if they happen in padding area
+            if (shouldIgnoreTouchDown(event.getX(), event.getY())) {
+                return false;
+            }
         }
         if (isLongClickable()) {
             super.onTouchEvent(event);
@@ -574,6 +613,9 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
      * @param canvas The canvas to draw to.
      */
     protected void drawDotIfNecessary(Canvas canvas) {
+        if (isUninstallVisible) {
+            drawUninstallIcon(canvas);
+        }
         if (!mForceHideDot && (hasDot() || mDotParams.scale > 0)) {
             getIconBounds(mDotParams.iconBounds);
             Utilities.scaleRectAboutCenter(mDotParams.iconBounds,
@@ -585,6 +627,90 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             mDotRenderer.draw(canvas, mDotParams, mDotInfo == null ? -1 : mDotInfo.getNotificationCount());
             canvas.translate(-scrollX, -scrollY);
         }
+    }
+
+    private void drawUninstallIcon(Canvas canvas) {
+        ItemInfo tag = (ItemInfo) this.getTag();
+
+        if (tag == null || tag.getIntent() == null || tag.itemType == ITEM_TYPE_FOLDER ||
+                !isDeepShortcut(tag)) {
+            if (isSystemApp(getContext(), tag.getIntent())) {
+                return;
+            }
+        }
+
+        Rect tempBounds = mDotParams.iconBounds;
+
+        getIconBounds(tempBounds);
+        Utilities.scaleRectAboutCenter(tempBounds, 0.75f);
+
+        final int scrollX = getScrollX();
+        final int scrollY = getScrollY();
+
+        canvas.translate(scrollX, scrollY);
+        mUninstallButtonRenderer.draw(canvas, tempBounds);
+        canvas.translate(-scrollX, -scrollY);
+    }
+
+    public void applyUninstallIconState(boolean showUninstallIcon) {
+        boolean wasUninstallVisible = isUninstallVisible;
+        isUninstallVisible = showUninstallIcon;
+
+        if (wasUninstallVisible || isUninstallVisible) {
+            invalidate();
+        }
+    }
+
+    public boolean tryToHandleUninstallClick(Launcher launcher) {
+        if (!isUninstallVisible) return false;
+        Rect iconBounds = mDotParams.iconBounds;
+        getIconBounds(iconBounds);
+
+        Rect uninstallIconBounds = mUninstallButtonRenderer.getBoundsScaled(iconBounds);
+
+        if (uninstallIconBounds.contains(touchX, touchY)) {
+            ItemInfo tag = (ItemInfo) this.getTag();
+            ComponentName cn = getUninstallTarget(launcher, tag);
+
+            if (!isDeepShortcut(tag) && isSystemApp(getContext(), tag.getIntent())) {
+                return false;
+            }
+
+            if (cn != null) {
+                try {
+                    Intent i = Intent.parseUri(launcher.getString(R.string.delete_package_intent), 0)
+                            .setData(Uri.fromParts("package", cn.getPackageName(), cn.getClassName()))
+                            .putExtra(Intent.EXTRA_USER, tag.user);
+                    launcher.startActivity(i);
+                } catch (URISyntaxException e) {
+                    Log.e(this.getClass().getSimpleName(), "Failed to parse intent to start uninstall activity for item=" + tag);
+                }
+            } else {
+                if (tag.id != ItemInfo.NO_ID) {
+                    new AlertDialog.Builder(launcher)
+                            .setTitle(tag.title)
+                            .setMessage(getContext().getString(R.string.uninstall_app))
+                            .setPositiveButton(getContext().getString(R.string.ok), (dialog, which) -> {
+                                clearAnimation();
+                                final String shortcutId = getShortcutIdIfPinnedShortcut(tag);
+                                launcher.getContentResolver().delete(Uri.parse("content://foundation.e.pwaplayer.provider/pwa"),
+                                        null, new String[]{shortcutId});
+                                launcher.removeItem(this, tag, true /* deleteFromDb */);
+                                launcher.getDragLayer()
+                                        .announceForAccessibility(getContext().getString(R.string.item_removed));
+                            })
+                            .setNegativeButton(getContext().getString(R.string.cancel), null)
+                            .show();
+                }
+            }
+
+            // Reset touch coordinates
+            touchX = 0;
+            touchY = 0;
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -1042,6 +1168,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     public SafeCloseable prepareDrawDragView() {
         resetIconScale();
         setForceHideDot(true);
+        applyUninstallIconState(false);
         return () -> { };
     }
 
@@ -1067,5 +1194,14 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         args.put("app_name", appName);
         args.put("count", notificationCount);
         return icuCountFormat.format(args);
+    }
+
+    @Override
+    public void onDragStart(DropTarget.DragObject dragObject, DragOptions options) {
+    }
+
+    @Override
+    public void onDragEnd() {
+        setForceHideDot(false);
     }
 }
