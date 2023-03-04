@@ -17,23 +17,32 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 
+import com.android.launcher3.Alarm;
+import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Hotseat;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherState;
+import com.android.launcher3.OnAlarmListener;
 import com.android.launcher3.R;
 import com.android.launcher3.Workspace;
 import com.android.launcher3.anim.AlphaUpdateListener;
 import com.android.launcher3.dragndrop.DragLayer;
+import com.android.launcher3.dragndrop.DragOptions;
 import com.android.launcher3.folder.Folder;
+import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.ScrimView;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import foundation.e.bliss.blur.BlurBackgroundView;
 
-public class GridFolder extends Folder {
+public class GridFolder extends Folder implements OnAlarmListener {
     private static final int MIN_CONTENT_DIMEN = 5;
     private final Launcher mLauncher;
     public View mFolderTab;
@@ -42,9 +51,14 @@ public class GridFolder extends Folder {
     private LauncherState mLastStateBeforeOpen = NORMAL;
     private boolean mNeedResetState = false;
 
+    private boolean isFolderWobbling = false;
+
+    private final Alarm wobbleExpireAlarm = new Alarm();
+
     public GridFolder(Context context, AttributeSet attrs) {
         super(context, attrs);
         mLauncher = mLauncherDelegate.getLauncher();
+        wobbleExpireAlarm.setOnAlarmListener(this);
     }
 
     @SuppressLint("InflateParams")
@@ -154,6 +168,10 @@ public class GridFolder extends Folder {
         showOrHideDesktop(mLauncher, true);
     }
 
+    public boolean isFolderWobbling() {
+        return isFolderWobbling;
+    }
+
     @Override
     protected void handleClose(boolean animate) {
         if (!mLauncher.isInState(mLastStateBeforeOpen)) {
@@ -182,6 +200,28 @@ public class GridFolder extends Folder {
         if (getOpen(mLauncher) == null) {
             showOrHideDesktop(mLauncher, false);
         }
+    }
+
+    @Override
+    public boolean startDrag(View v, DragOptions options) {
+        if (!isFolderWobbling) {
+            wobbleFolder(true);
+            return true;
+        } else {
+            Object tag = v.getTag();
+            if (tag instanceof WorkspaceItemInfo) {
+                v.clearAnimation();
+            }
+            return super.startDrag(v, options);
+        }
+    }
+
+    @Override
+    public void onDragEnd() {
+        if (isFolderWobbling) {
+            wobbleFolder(true);
+        }
+        super.onDragEnd();
     }
 
     private void showOrHideDesktop(Launcher launcher, boolean hide) {
@@ -244,5 +284,41 @@ public class GridFolder extends Folder {
         LinearLayout.LayoutParams tabLp = (LinearLayout.LayoutParams) mFolderTab.getLayoutParams();
         return mFolderTabHeight + tabLp.bottomMargin;
 
+    }
+
+    public void wobbleFolder(boolean wobble) {
+        isFolderWobbling = wobble;
+        mLauncher.getWorkspace().wobbleLayouts(wobble);
+        if (wobble) {
+            Animation wobbleAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.wobble);
+            Animation reverseWobbleAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.wobble_reverse);
+            AtomicInteger index = new AtomicInteger();
+            iterateOverItems((info, view) -> {
+                index.getAndIncrement();
+                if (index.get() % 2 == 0) {
+                    view.startAnimation(wobbleAnimation);
+                } else {
+                    view.startAnimation(reverseWobbleAnimation);
+                }
+                if (view instanceof BubbleTextView) {
+                    ((BubbleTextView) view).applyUninstallIconState(true);
+                }
+                return false;
+            });
+            wobbleExpireAlarm.setAlarm(Workspace.WOBBLE_EXPIRATION_TIMEOUT);
+        } else {
+            iterateOverItems((info, view) -> {
+                view.clearAnimation();
+                if (view instanceof BubbleTextView) {
+                    ((BubbleTextView) view).applyUninstallIconState(false);
+                }
+                return false;
+            });
+        }
+    }
+
+    @Override
+    public void onAlarm(Alarm alarm) {
+        wobbleFolder(false);
     }
 }

@@ -39,6 +39,8 @@ import com.android.launcher3.dragndrop.DragController.DragListener;
 import com.android.launcher3.dragndrop.DragOptions;
 import com.android.launcher3.testing.shared.TestProtocol;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /*
  * The top bar containing various drop targets: Delete/App Info/Uninstall.
  */
@@ -302,7 +304,7 @@ public class DropTargetBar extends FrameLayout
         if (TestProtocol.sDebugTracing) {
             Log.d(TestProtocol.NO_DROP_TARGET, "8");
         }
-        if (mVisible != isVisible) {
+        if (mVisible != isVisible && !MultiModeController.isSingleLayerMode()) {
             mVisible = isVisible;
 
             // Cancel any existing animation
