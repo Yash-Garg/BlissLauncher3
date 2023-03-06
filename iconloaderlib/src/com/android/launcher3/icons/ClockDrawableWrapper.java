@@ -58,7 +58,7 @@ public class ClockDrawableWrapper extends AdaptiveIconDrawable implements Bitmap
 
     private static final String TAG = "ClockDrawableWrapper";
 
-    private static final boolean DISABLE_SECONDS = true;
+    private static final boolean DISABLE_SECONDS = false;
     private static final int NO_COLOR = -1;
 
     // Time after which the clock icon should check for an update. The actual invalidate
@@ -92,7 +92,7 @@ public class ClockDrawableWrapper extends AdaptiveIconDrawable implements Bitmap
         super(base.getBackground(), base.getForeground());
     }
 
-    private void applyThemeData(ThemeData themeData) {
+    private void applyThemeData(ThemeData themeData, Context context) {
         if (!IconProvider.ATLEAST_T || mThemeInfo != null) {
             return;
         }
@@ -111,7 +111,7 @@ public class ClockDrawableWrapper extends AdaptiveIconDrawable implements Bitmap
                 Drawable bg = new ColorDrawable(Color.WHITE);
                 Drawable fg = themeData.mResources.getDrawable(resId).mutate();
                 return new AdaptiveIconDrawable(bg, fg);
-            });
+            }, context);
             if (drawable != null) {
                 mThemeInfo = drawable.mAnimationInfo;
             }
@@ -146,9 +146,9 @@ public class ClockDrawableWrapper extends AdaptiveIconDrawable implements Bitmap
                     PackageManager.MATCH_UNINSTALLED_PACKAGES | PackageManager.GET_META_DATA);
             Resources res = pm.getResourcesForApplication(appInfo);
             ClockDrawableWrapper wrapper = forExtras(appInfo.metaData,
-                    resId -> res.getDrawableForDensity(resId, iconDpi));
+                    resId -> res.getDrawableForDensity(resId, iconDpi), context);
             if (wrapper != null && themeData != null) {
-                wrapper.applyThemeData(themeData);
+                wrapper.applyThemeData(themeData ,context);
             }
             return wrapper;
         } catch (Exception e) {
@@ -159,16 +159,9 @@ public class ClockDrawableWrapper extends AdaptiveIconDrawable implements Bitmap
 
     @TargetApi(Build.VERSION_CODES.TIRAMISU)
     private static ClockDrawableWrapper forExtras(
-            Bundle metadata, IntFunction<Drawable> drawableProvider) {
-        if (metadata == null) {
-            return null;
-        }
-        int drawableId = metadata.getInt(ROUND_ICON_METADATA_KEY, 0);
-        if (drawableId == 0) {
-            return null;
-        }
+            Bundle metadata, IntFunction<Drawable> drawableProvider, Context context) {
 
-        Drawable drawable = drawableProvider.apply(drawableId).mutate();
+        Drawable drawable = context.getDrawable(R.drawable.clock);
         if (!(drawable instanceof AdaptiveIconDrawable)) {
             return null;
         }
@@ -178,13 +171,13 @@ public class ClockDrawableWrapper extends AdaptiveIconDrawable implements Bitmap
         AnimationInfo info = wrapper.mAnimationInfo;
 
         info.baseDrawableState = drawable.getConstantState();
-        info.hourLayerIndex = metadata.getInt(HOUR_INDEX_METADATA_KEY, INVALID_VALUE);
-        info.minuteLayerIndex = metadata.getInt(MINUTE_INDEX_METADATA_KEY, INVALID_VALUE);
-        info.secondLayerIndex = metadata.getInt(SECOND_INDEX_METADATA_KEY, INVALID_VALUE);
+        info.hourLayerIndex = 0;
+        info.minuteLayerIndex = 1;
+        info.secondLayerIndex = 2;
 
-        info.defaultHour = metadata.getInt(DEFAULT_HOUR_METADATA_KEY, 0);
-        info.defaultMinute = metadata.getInt(DEFAULT_MINUTE_METADATA_KEY, 0);
-        info.defaultSecond = metadata.getInt(DEFAULT_SECOND_METADATA_KEY, 0);
+        info.defaultHour = 10;
+        info.defaultMinute = 10;
+        info.defaultSecond = 30;
 
         LayerDrawable foreground = (LayerDrawable) wrapper.getForeground();
         int layerCount = foreground.getNumberOfLayers();

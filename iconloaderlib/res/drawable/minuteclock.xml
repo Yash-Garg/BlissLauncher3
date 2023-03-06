@@ -1,0 +1,19 @@
+<rotate xmlns:android="http://schemas.android.com/apk/res/android"
+    android:fromDegrees="60.0"
+    android:pivotX="50.0%"
+    android:pivotY="50.0%"
+    android:toDegrees="60060.0">
+
+    <vector
+        android:width="108dp"
+        android:height="108dp"
+        android:viewportWidth="108"
+        android:viewportHeight="108">
+      <path
+          android:pathData="M53.93,31.63h0.8v23.83h-0.8z"
+          android:fillColor="#000000"/>
+        <path
+            android:fillColor="#000000"
+            android:pathData="M54,53.5L54,53.5A0.5,0.5 0,0 1,54.5 54L54.5,54A0.5,0.5 0,0 1,54 54.5L54,54.5A0.5,0.5 0,0 1,53.5 54L53.5,54A0.5,0.5 0,0 1,54 53.5z" />
+    </vector>
+</rotate>
