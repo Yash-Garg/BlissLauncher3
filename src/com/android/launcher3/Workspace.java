@@ -32,6 +32,8 @@ import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCH
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SWIPERIGHT;
 import static com.android.launcher3.testing.TestProtocol.BAD_STATE;
 
+import static foundation.e.bliss.utils.BlissUtilsKt.createNavbarColorAnimator;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
@@ -269,6 +271,8 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
 
     private final StatsLogManager mStatsLogManager;
 
+    private final ValueAnimator navbarAnimator;
+
     /**
      * Used to inflate the Workspace from XML.
      *
@@ -292,6 +296,8 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         mLauncher = Launcher.getLauncher(context);
         mStateTransitionAnimation = new WorkspaceStateTransitionAnimation(mLauncher, this);
         mWallpaperManager = WallpaperManager.getInstance(context);
+
+        navbarAnimator = createNavbarColorAnimator(mLauncher.getWindow());
 
         mWallpaperOffset = new WallpaperOffsetInterpolator(this);
 
@@ -1349,6 +1355,12 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
                                     LauncherAtom.WorkspaceContainer.newBuilder()
                                             .setPageIndex(prevPage)).build())
                     .log(event);
+
+            if (mCurrentPage == 0 && prevPage == 1) {
+                navbarAnimator.start();
+            } else if (prevPage == 0 && mCurrentPage == 1) {
+                navbarAnimator.reverse();
+            }
         }
     }
 
