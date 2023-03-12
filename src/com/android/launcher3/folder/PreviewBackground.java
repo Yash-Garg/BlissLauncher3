@@ -40,10 +40,14 @@ import android.graphics.Shader;
 import android.util.Property;
 import android.view.View;
 
+import androidx.core.content.ContextCompat;
+
 import com.android.launcher3.CellLayout;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.R;
 import com.android.launcher3.views.ActivityContext;
+
+import foundation.e.bliss.multimode.MultiModeController;
 
 /**
  * This object represents a FolderIcon preview background. It stores drawing / measurement
@@ -154,6 +158,10 @@ public class PreviewBackground extends CellLayout.DelegatedCellDrawing {
         mStrokeColor = ta.getColor(R.styleable.FolderIconPreview_folderIconBorderColor, 0);
         mBgColor = ta.getColor(R.styleable.FolderIconPreview_folderPreviewColor, 0);
         ta.recycle();
+
+        if (MultiModeController.isSingleLayerMode()) {
+            mBgColor = ContextCompat.getColor(context, R.color.gridFolderPreview);
+        }
 
         DeviceProfile grid = activity.getDeviceProfile();
         previewSize = grid.folderIconSizePx;

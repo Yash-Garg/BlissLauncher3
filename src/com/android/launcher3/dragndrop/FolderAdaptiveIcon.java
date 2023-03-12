@@ -25,6 +25,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -34,10 +35,13 @@ import androidx.annotation.Nullable;
 
 import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.folder.PreviewBackground;
+import com.android.launcher3.graphics.IconShape;
 import com.android.launcher3.graphics.ShiftedBitmapDrawable;
 import com.android.launcher3.icons.BitmapRenderer;
 import com.android.launcher3.util.Preconditions;
 import com.android.launcher3.views.ActivityContext;
+
+import foundation.e.bliss.multimode.MultiModeController;
 
 /**
  * {@link AdaptiveIconDrawable} representation of a {@link FolderIcon}
@@ -134,7 +138,18 @@ public class FolderAdaptiveIcon extends AdaptiveIconDrawable {
                     Paint p = new Paint();
                     p.setColor(bg.getBgColor());
 
-                    canvas.drawCircle(dragViewSize.x / 2f, dragViewSize.y / 2f, bg.getRadius(), p);
+                    int radius = bg.getRadius();
+                    if (MultiModeController.isSingleLayerMode()) {
+                        Path bgPath = new Path();
+                        IconShape.getShape().addToPath(
+                                bgPath,
+                                dragViewSize.x / 2f - radius,
+                                dragViewSize.y / 2f - radius,
+                                radius);
+                        canvas.drawPath(bgPath, p);
+                    } else {
+                        canvas.drawCircle(dragViewSize.x / 2f, dragViewSize.y / 2f, radius, p);
+                    }
                 });
 
         ShiftedBitmapDrawable badge = new ShiftedBitmapDrawable(badgeBmp, 0, 0);
