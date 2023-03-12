@@ -1001,7 +1001,7 @@ public class DeviceProfile {
         updateHotseatSizes(iconSizePx);
 
         // Folder icon
-        folderIconSizePx = IconNormalizer.getNormalizedCircleSize(iconSizePx);
+        folderIconSizePx = IconNormalizer.getNormalizedCircleSize(iconSizePx - iconDrawablePaddingPx);
         folderIconOffsetYPx = (iconSizePx - folderIconSizePx) / 2;
     }
 

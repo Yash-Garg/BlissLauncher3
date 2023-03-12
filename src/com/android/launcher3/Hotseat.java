@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import com.android.launcher3.folder.Folder;
 
 import androidx.annotation.NonNull;
 
@@ -262,5 +263,12 @@ public class Hotseat extends CellLayout implements Insettable, OffsetParent {
     @Override
     public void removeOnOffsetChangeListener(@NonNull OnOffsetChangeListener listener) {
         offsetParentDelegate.removeOnOffsetChangeListener(listener);
+    }
+
+    @Override
+    public void setAlpha(float alpha) {
+        if (Folder.getOpen(mActivity) == null) {
+            super.setAlpha(alpha);
+        }
     }
 }
