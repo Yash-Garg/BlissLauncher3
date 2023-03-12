@@ -31,6 +31,8 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.launcher3.folder.Folder;
+
 import java.util.function.Consumer;
 
 import foundation.e.bliss.blur.BlurViewDelegate;
@@ -280,5 +282,12 @@ public class Hotseat extends CellLayout implements Insettable, OffsetParent {
     @Override
     public boolean getNeedWallpaperScroll() {
         return true;
+    }
+
+    @Override
+    public void setAlpha(float alpha) {
+        if (Folder.getOpen(mActivity) == null) {
+            super.setAlpha(alpha);
+        }
     }
 }
