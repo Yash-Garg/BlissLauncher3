@@ -12,7 +12,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        //noinspection JcenterRepositoryObsolete
         jcenter()
+        maven { url "https://gitlab.e.foundation/api/v4/groups/9/-/packages/maven" }
         maven { url "https://jitpack.io" }
     }
 }
@@ -20,7 +22,7 @@ dependencyResolutionManagement {
 include ':IconLoader'
 project(':IconLoader').projectDir = new File(rootDir, 'iconloaderlib')
 
-include ':searchuilib'
-project(':searchuilib').projectDir = new File(rootDir, 'searchuilib')
+include ':SearchUILib'
+project(':SearchUILib').projectDir = new File(rootDir, 'searchuilib')
 
 rootProject.name = "BlissLauncher"

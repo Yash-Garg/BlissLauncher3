@@ -34,7 +34,8 @@
                 android:maxLines="1"
                 android:padding="8dp"
                 android:textColor="@color/text_color_primary_dark"
-                android:textColorHint="@color/text_color_primary_dark" />
+                android:textColorHint="@color/text_color_primary_dark"
+                android:theme="@style/SearchBar" />
 
             <ImageView
                 android:id="@+id/clearSuggestions"

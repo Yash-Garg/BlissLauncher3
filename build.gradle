@@ -234,6 +234,7 @@ dependencies {
     implementation libs.androidx.slice.view
     implementation libs.reactivex.rxkotlin3
     implementation libs.hoko.blur
+    implementation libs.elib
 
     implementation libs.square.gson
     implementation libs.square.logging
