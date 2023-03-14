@@ -69,11 +69,12 @@ android {
     useLibrary "android.test.mock"
 
     defaultConfig {
-        versionCode 300_00_20
+        versionCode 300_00_00
         versionName "3.0.0-alpha2"
         buildConfigField "boolean", "IS_STUDIO_BUILD", "false"
         buildConfigField "boolean", "QSB_ON_FIRST_SCREEN", "true"
         buildConfigField "boolean", "IS_DEBUG_DEVICE", "false"
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -103,7 +104,7 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.debugConfig
+            signingConfig = signingConfigs.platformConfig
         }
     }
 
