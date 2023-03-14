@@ -88,6 +88,7 @@ import java.util.function.Supplier;
 
 import foundation.e.bliss.LauncherAppMonitor;
 import foundation.e.bliss.multimode.MultiModeController;
+import foundation.e.bliss.utils.BlissDbUtils;
 
 public class LauncherProvider extends ContentProvider {
     private static final String TAG = "LauncherProvider";
@@ -352,7 +353,10 @@ public class LauncherProvider extends ContentProvider {
 
         addModifiedTime(values);
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        int count = db.update(args.table, values, args.where, args.args);
+        int count = 0;
+        if (tableExists(mOpenHelper.getWritableDatabase(), args.table)) {
+            count = db.update(args.table, values, args.where, args.args);
+        }
         reloadLauncherIfExternal();
         return count;
     }
@@ -523,6 +527,13 @@ public class LauncherProvider extends ContentProvider {
      */
     synchronized private void loadDefaultFavoritesIfNecessary() {
         SharedPreferences sp = Utilities.getPrefs(getContext());
+
+        if (BlissDbUtils.migrateDataFromDb(getContext())) {
+            copyTable(mOpenHelper.getReadableDatabase(), Favorites.TABLE_NAME_ALL,
+                    mOpenHelper.getWritableDatabase(),Favorites.TABLE_NAME, getContext());
+            clearFlagEmptyDbCreated();
+            return;
+        }
 
         if (sp.getBoolean(mOpenHelper.getKey(getEmptyDatabaseCreated()), false)) {
             Log.d(TAG, "loading default workspace");
