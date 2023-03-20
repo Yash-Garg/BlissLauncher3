@@ -79,7 +79,10 @@ import com.android.launcher3.widget.WidgetCellPreview;
 import com.android.launcher3.widget.WidgetImageView;
 import com.android.launcher3.widget.WidgetManagerHelper;
 
+import java.util.Objects;
 import java.util.function.Supplier;
+
+import foundation.e.bliss.utils.BlissConstants;
 
 /**
  * Activity to show pin widget dialog.
@@ -143,6 +146,11 @@ public class AddItemActivity extends BaseActivity
         switch (mRequest.getRequestType()) {
             case PinItemRequest.REQUEST_TYPE_SHORTCUT:
                 targetApp = setupShortcut();
+                if (Objects.requireNonNull(mRequest.getShortcutInfo())
+                        .getPackage().equals(BlissConstants.APPS_PACKAGE)) {
+                    onPlaceAutomaticallyClick();
+                    return;
+                }
                 break;
             case PinItemRequest.REQUEST_TYPE_APPWIDGET:
                 targetApp = setupWidget();
@@ -320,10 +328,14 @@ public class AddItemActivity extends BaseActivity
         mSlideInView.close(/* animate= */ true);
     }
 
+    public void onPlaceAutomaticallyClick(View v) {
+        onPlaceAutomaticallyClick();
+    }
+
     /**
      * Called when place-automatically button is clicked.
      */
-    public void onPlaceAutomaticallyClick(View v) {
+    public void onPlaceAutomaticallyClick() {
         if (mRequest.getRequestType() == PinItemRequest.REQUEST_TYPE_SHORTCUT) {
             ShortcutInfo shortcutInfo = mRequest.getShortcutInfo();
             ItemInstallQueue.INSTANCE.get(this).queueItem(shortcutInfo);
@@ -334,7 +346,9 @@ public class AddItemActivity extends BaseActivity
                 label = shortcutInfo.getShortLabel();
             }
             sendWidgetAddedToScreenAccessibilityEvent(label.toString());
-            mSlideInView.close(/* animate= */ true);
+            if (mSlideInView != null) {
+                mSlideInView.close(/* animate= */ true);
+            }
             return;
         }
 
@@ -359,7 +373,9 @@ public class AddItemActivity extends BaseActivity
         mWidgetOptions.putInt(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
         mRequest.accept(mWidgetOptions);
         logCommand(LAUNCHER_ADD_EXTERNAL_ITEM_PLACED_AUTOMATICALLY);
-        mSlideInView.close(/* animate= */ true);
+        if (mSlideInView != null) {
+            mSlideInView.close(/* animate= */ true);
+        }
     }
 
     @Override
