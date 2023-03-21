@@ -66,6 +66,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.android.launcher3.accessibility.AccessibleDragListenerAdapter;
 import com.android.launcher3.accessibility.WorkspaceAccessibilityHelper;
@@ -1346,12 +1347,15 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
             if (mCurrentPage != 0) {
                 mLauncher.mBlurLayer.setAlpha(0f);
+                getWindowInsetsController().show(WindowInsetsCompat.Type.statusBars());
             }
 
             if (mCurrentPage == 0 && prevPage == 1) {
                 navbarAnimator.start();
+                getWindowInsetsController().hide(WindowInsetsCompat.Type.statusBars());
             } else if (prevPage == 0 && mCurrentPage == 1) {
                 navbarAnimator.reverse();
+                getWindowInsetsController().show(WindowInsetsCompat.Type.statusBars());
             }
         }
     }
