@@ -41,8 +41,8 @@ public class DotRenderer {
     private static final String TAG = "DotRenderer";
 
     // The dot size is defined as a percentage of the app icon size.
-    private static final float SIZE_PERCENTAGE = 0.228f;
-    private static final float SIZE_PERCENTAGE_WITH_COUNT = 0.348f;
+    private static final float SIZE_PERCENTAGE = 0.21f;
+    private static final float SIZE_PERCENTAGE_WITH_COUNT = 0.28f;
 
     // The max number to draw on dots
     private static final int MAX_COUNT = 99;
