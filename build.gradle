@@ -54,10 +54,10 @@ allprojects {
             throw new IllegalArgumentException("Framework jar path doesn't exist")
         }
         gradle.projectsEvaluated {
-            tasks.withType(JavaCompile) {
+            tasks.withType(JavaCompile).configureEach {
                 options.bootstrapClasspath = files([frameworkJar] + (options.bootstrapClasspath.files as Iterable<File>))
             }
-            tasks.withType(KotlinCompile) {
+            tasks.withType(KotlinCompile).configureEach {
                 it.libraries.setFrom(files([frameworkJar] + it.libraries.getFrom()))
             }
         }
@@ -98,6 +98,13 @@ android {
             minifyEnabled false
             signingConfig signingConfigs.platformConfig
         }
+
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.debugConfig
+        }
     }
 
     compileOptions {
@@ -135,13 +142,6 @@ android {
         configureEach {
             resValue("string", "quickstep_component", "${applicationId}/com.android.launcher3.uioverrides.QuickstepLauncher")
             resValue("string", "launcher_component", "${applicationId}/com.android.launcher3.Launcher")
-        }
-    }
-
-    // Disable release builds for now
-    variantFilter { variant ->
-        if (variant.buildType.name.endsWith('release')) {
-            variant.setIgnore(true)
         }
     }
 
