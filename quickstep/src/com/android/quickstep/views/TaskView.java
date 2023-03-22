@@ -737,7 +737,12 @@ public class TaskView extends FrameLayout implements Reusable {
 
             // Indicate success once the system has indicated that the transition has started
             ActivityOptions opts = ActivityOptionsCompat.makeCustomAnimation(
-                    getContext(), 0, 0, () -> callback.accept(true), MAIN_EXECUTOR.getHandler());
+                    getContext(), 0, 0, () -> new ActivityOptions.OnAnimationStartedListener() {
+                        @Override
+                        public void onAnimationStarted() {
+                            callback.accept(true);
+                        }
+                    }, MAIN_EXECUTOR.getHandler());
             opts.setLaunchDisplayId(getRootViewDisplayId());
             if (freezeTaskList) {
                 ActivityOptionsCompat.setFreezeRecentTasksList(opts);
