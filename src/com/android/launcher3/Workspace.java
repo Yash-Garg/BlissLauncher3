@@ -1792,6 +1792,7 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
 
         if (child instanceof BubbleTextView && !dragOptions.isAccessibleDrag) {
             if (MultiModeController.isSingleLayerMode()) {
+                mLauncher.getDragController().addDragListener(this);
                 dragOptions.preDragCondition = createWobblePreDragCondition();
             } else {
                 PopupContainerWithArrow<Launcher> popupContainer = PopupContainerWithArrow
