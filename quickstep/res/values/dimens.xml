@@ -271,7 +271,7 @@
     <dimen name="floating_rotation_button_taskbar_bottom_margin">10dp</dimen>
 
     <!-- Taskbar -->
-    <dimen name="taskbar_size">@*android:dimen/taskbar_frame_height</dimen>
+    <dimen name="taskbar_size">60dp</dimen>
     <dimen name="taskbar_ime_size">48dp</dimen>
     <dimen name="taskbar_icon_min_touch_size">48dp</dimen>
     <!-- Note that this applies to both sides of all icons, so visible space is double this. -->
