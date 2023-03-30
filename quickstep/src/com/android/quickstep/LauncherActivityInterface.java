@@ -29,6 +29,7 @@ import android.animation.AnimatorSet;
 import android.content.Context;
 import android.graphics.Rect;
 import android.view.MotionEvent;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
@@ -55,6 +56,8 @@ import com.android.systemui.shared.system.RemoteAnimationTargetCompat;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+
+import retrofit2.http.HEAD;
 
 /**
  * {@link BaseActivityInterface} for the in-launcher recents.
@@ -287,6 +290,9 @@ public final class LauncherActivityInterface extends
             om.hideOverlay(false /* animate */);
         } else {
             om.hideOverlay(150);
+        }
+        if (launcher.swipeSearchContainer.getVisibility() == View.VISIBLE) {
+            launcher.hideSwipeSearchContainer();
         }
         LauncherTaskbarUIController taskbarController = getTaskbarController();
         if (taskbarController != null) {

@@ -1415,6 +1415,7 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
             } else if (prevPage == 0 && mCurrentPage == 1) {
                 navbarAnimator.reverse();
                 getWindowInsetsController().show(WindowInsetsCompat.Type.statusBars());
+                mQsb.clearFocus();
             }
         }
     }
