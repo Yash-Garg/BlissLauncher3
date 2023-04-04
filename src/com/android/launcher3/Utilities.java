@@ -100,6 +100,8 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * Various utilities shared amongst the Launcher's classes.
  */
@@ -742,8 +744,9 @@ public final class Utilities {
         if (info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT) {
             boolean iconBadged = (info instanceof ItemInfoWithIcon)
                     && (((ItemInfoWithIcon) info).runtimeStatusFlags & FLAG_ICON_BADGED) > 0;
-            if ((info.id == ItemInfo.NO_ID && !iconBadged)
-                    || !(obj instanceof ShortcutInfo)) {
+            if (((info.id == ItemInfo.NO_ID && !iconBadged)
+                    || !(obj instanceof ShortcutInfo))
+                    || MultiModeController.isSingleLayerMode()) {
                 // The item is not yet added on home screen.
                 return new FixedSizeEmptyDrawable(iconSize);
             }
