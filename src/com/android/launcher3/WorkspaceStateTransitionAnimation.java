@@ -36,6 +36,7 @@ import static com.android.launcher3.anim.Interpolators.LINEAR;
 import static com.android.launcher3.anim.Interpolators.ZOOM_OUT;
 import static com.android.launcher3.anim.PropertySetter.NO_ANIM_PROPERTY_SETTER;
 import static com.android.launcher3.config.FeatureFlags.HOME_GARDENING_WORKSPACE_BUTTONS;
+import static com.android.launcher3.config.FeatureFlags.QSB_ON_FIRST_SCREEN;
 import static com.android.launcher3.config.FeatureFlags.SHOW_HOME_GARDENING;
 import static com.android.launcher3.graphics.Scrim.SCRIM_PROGRESS;
 import static com.android.launcher3.graphics.SysUiScrim.SYSUI_PROGRESS;
@@ -160,7 +161,7 @@ public class WorkspaceStateTransitionAnimation {
         float hotseatIconsAlpha = (elements & HOTSEAT_ICONS) != 0 ? 1 : 0;
         propertySetter.setViewAlpha(hotseat, hotseatIconsAlpha, hotseatFadeInterpolator);
 
-        if (SHOW_HOME_GARDENING.get()) {
+        if (SHOW_HOME_GARDENING.get() && QSB_ON_FIRST_SCREEN) {
             propertySetter.setViewAlpha(
                     mWorkspace.getFirstPagePinnedItem(),
                     state == SPRING_LOADED ? FIRST_PAGE_PINNED_WIDGET_DISABLED_ALPHA : 1,

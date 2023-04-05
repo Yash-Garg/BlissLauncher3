@@ -29,6 +29,8 @@ import com.android.launcher3.Utilities;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * Defines a set of flags used to control various launcher behaviors.
  *
@@ -303,9 +305,17 @@ public final class FeatureFlags {
     public static final BooleanFlag ENABLE_SEARCH_UNINSTALLED_APPS = getReleaseFlag(270395269,
             "ENABLE_SEARCH_UNINSTALLED_APPS", false, "Search uninstalled app results.");
 
-    public static final BooleanFlag SHOW_HOME_GARDENING = getDebugFlag(270395183,
-            "SHOW_HOME_GARDENING", false,
-            "Show the new home gardening mode");
+    public static final class SHOW_HOME_GARDENING {
+        public static boolean get() {
+            if (MultiModeController.isSingleLayerMode()) {
+                return  true;
+            } else {
+                return getDebugFlag(270395183,
+                        "SHOW_HOME_GARDENING", false,
+                        "Show the new home gardening mode").get();
+            }
+        }
+    }
 
     public static final BooleanFlag HOME_GARDENING_WORKSPACE_BUTTONS = getDebugFlag(270395133,
             "HOME_GARDENING_WORKSPACE_BUTTONS", false,
