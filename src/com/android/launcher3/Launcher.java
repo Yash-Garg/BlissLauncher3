@@ -2267,7 +2267,8 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         int count = orderedScreenIds.size();
         for (int i = 0; i < count; i++) {
             int screenId = orderedScreenIds.get(i);
-            if (FeatureFlags.QSB_ON_FIRST_SCREEN && screenId == Workspace.FIRST_SCREEN_ID) {
+            if ((FeatureFlags.QSB_ON_FIRST_SCREEN && screenId == Workspace.FIRST_SCREEN_ID)
+                    || FeatureFlags.QSB_ON_FIRST_SCREEN && screenId == Workspace.SECOND_SCREEN_ID) {
                 // No need to bind the first screen, as its always bound.
                 continue;
             }
@@ -2716,7 +2717,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
 
         int currentPage = pagesBoundFirst != null && !pagesBoundFirst.isEmpty()
                 ? mWorkspace.getPageIndexForScreenId(pagesBoundFirst.getArray().get(0))
-                : PagedView.INVALID_PAGE;
+                : Workspace.DEFAULT_PAGE;
         // When undoing the removal of the last item on a page, return to that page.
         // Since we are just resetting the current page without user interaction,
         // override the previous page so we don't log the page switch.

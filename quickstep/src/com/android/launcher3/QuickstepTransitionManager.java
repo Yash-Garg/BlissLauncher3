@@ -1590,7 +1590,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 View launcherView = findLauncherView(appTargets);
                 boolean playFallBackAnimation = (launcherView == null
                         && launcherIsForceInvisibleOrOpening)
-                        || mLauncher.getWorkspace().isOverlayShown();
+                        || mLauncher.getWorkspace().isOverlayShown()
+                        || mLauncher.getWorkspace().getDestinationPage() == 0;
 
                 boolean playWorkspaceReveal = true;
                 boolean skipAllAppsScale = false;

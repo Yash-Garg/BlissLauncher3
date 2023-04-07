@@ -324,6 +324,14 @@ public class PageIndicatorDots extends View implements PageIndicator {
         }
     }
 
+    @Override
+    public void setTranslationY(float translationY) {
+    }
+
+    public void  setForcedTranslationY(float translationY) {
+        super.setTranslationY(translationY);
+    }
+
     /**
      * Listener for keep running the animation until the final state is reached.
      */
