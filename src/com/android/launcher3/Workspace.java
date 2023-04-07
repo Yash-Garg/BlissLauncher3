@@ -96,6 +96,7 @@ import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.model.data.WorkspaceItemFactory;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.pageindicators.PageIndicator;
+import com.android.launcher3.pageindicators.PageIndicatorDots;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StateManager.StateHandler;
 import com.android.launcher3.states.StateAnimationConfig;
@@ -615,6 +616,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             Log.e(TAG, "Failed to add to item at (0, 0) to CellLayout");
             mFirstPagePinnedItem = null;
         }
+
+        insertNewWorkspaceScreen(SECOND_SCREEN_ID, getChildCount());
     }
 
     public void removeAllWorkspaceScreens() {
@@ -778,8 +781,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             int screenId = mScreenOrder.get(pageIndex);
             CellLayout screen = mWorkspaceScreens.get(screenId);
             if (screen == null || screen.getShortcutsAndWidgets().getChildCount() != 0
-                    || screen.isDropPending()) {
-                // Final screen doesn't exist or it isn't empty or there's a pending drop
+                    || screen.isDropPending()
+                    || (FeatureFlags.QSB_ON_FIRST_SCREEN && screenId == SECOND_SCREEN_ID)) {
+                // Final screen doesn't exist or it isn't empty or there's a pending drop or
+                // It is an empty page used when QSB is there
                 return;
             }
             finalScreens.append(screenId, screen);
@@ -1007,7 +1012,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             int id = mWorkspaceScreens.keyAt(i);
             CellLayout cl = mWorkspaceScreens.valueAt(i);
             // FIRST_SCREEN_ID can never be removed.
-            if ((!FeatureFlags.QSB_ON_FIRST_SCREEN || id > FIRST_SCREEN_ID)
+            if ((!FeatureFlags.QSB_ON_FIRST_SCREEN || id > SECOND_SCREEN_ID)
                     && cl.getShortcutsAndWidgets().getChildCount() == 0) {
                 removeScreens.add(id);
             }
@@ -1247,8 +1252,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
         float qsbPadding = progress * bottomPadding;
 
-        getHotseat().setTranslationY(dockTranslationY);
-        getPageIndicator().setTranslationY(dockTranslationY);
+        getHotseat().setForcedTranslationY(dockTranslationY);
+        ((PageIndicatorDots) getPageIndicator()).setForcedTranslationY(dockTranslationY);
         setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
                 progress != 0 ? (int) qsbPadding : getPaddingBottom());
     }
@@ -1319,6 +1324,17 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                                             .setPageIndex(prevPage)).build())
                     .log(event);
         }
+    }
+
+    @Override
+    public void setCurrentPage(int currentPage, int overridePrevPage) {
+        if (currentPage == FIRST_SCREEN_ID) {
+            Hotseat hotseat = getHotseat();
+             if (hotseat.getTranslationY() >= 0) {
+                 hotseat.setForcedTranslationY(hotseat.getHeight() + getPageIndicator().getHeight());
+             }
+        }
+        super.setCurrentPage(currentPage, overridePrevPage);
     }
 
     protected void setWallpaperDimension() {

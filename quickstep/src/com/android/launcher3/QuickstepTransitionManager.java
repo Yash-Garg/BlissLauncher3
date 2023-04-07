@@ -87,6 +87,7 @@ import android.os.Looper;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Size;
 import android.view.CrossWindowBlurListeners;
@@ -1585,7 +1586,9 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             boolean playFallBackAnimation = (launcherView == null
                     && launcherIsForceInvisibleOrOpening)
                     || mLauncher.getWorkspace().isOverlayShown()
-                    || hasMultipleTargetsWithMode(appTargets, MODE_CLOSING);
+                    || hasMultipleTargetsWithMode(appTargets, MODE_CLOSING)
+                    || mLauncher.getWorkspace().getDestinationPage() == 0;
+
 
             boolean playWorkspaceReveal = true;
             boolean skipAllAppsScale = false;
