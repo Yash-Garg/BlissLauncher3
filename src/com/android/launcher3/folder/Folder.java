@@ -234,7 +234,7 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
     @Nullable
     private KeyboardInsetAnimationCallback mKeyboardInsetAnimationCallback;
 
-    private GradientDrawable mBackground;
+    public GradientDrawable mBackground;
 
     /**
      * Used to inflate the Workspace from XML.
@@ -1676,5 +1676,10 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
         int windowBottomPx = mActivityContext.getDeviceProfile().heightPx;
 
         return windowBottomPx - folderBottomPx;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends View & ClipPathView> T getAnimateObject() {
+        return (T) this;
     }
 }
