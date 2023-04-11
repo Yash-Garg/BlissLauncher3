@@ -162,7 +162,6 @@ public class FolderAnimationManager {
         mFolder.updateFolderOnAnimate(mIsOpening);
         int unusedOffsetY = (int) (mFolder.getUnusedOffsetYOnAnimate(mIsOpening) * initialScale);
 
-
         // We want to create a small X offset for the preview items, so that they follow their
         // expected path to their final locations. ie. an icon should not move right, if it's final
         // location is to its left. This value is arbitrarily defined.
@@ -245,13 +244,17 @@ public class FolderAnimationManager {
 
         // Create reveal animator for the folder background
         play(a, getShape().createRevealAnimator(
-                mFolder, startRect, endRect, finalRadius, !mIsOpening));
+                mFolder.getAnimateObject(), startRect, endRect, finalRadius, !mIsOpening));
 
-        // Create reveal animator for the folder content (capture the top 4 icons 2x2)
+
+        // Create reveal animator for the folder content
+        int column = MultiModeController.isSingleLayerMode() ? 3 : 2;
+        int row = MultiModeController.isSingleLayerMode() ? 3 : 2;
         int width = mDeviceProfile.folderCellLayoutBorderSpacePx
-                + mDeviceProfile.folderCellWidthPx * 2;
+                + mDeviceProfile.folderCellWidthPx * row;
         int height = mDeviceProfile.folderCellLayoutBorderSpacePx
-                + mDeviceProfile.folderCellHeightPx * 2;
+                + mDeviceProfile.folderCellHeightPx * column;
+
         int page = mIsOpening ? mContent.getCurrentPage() : mContent.getDestinationPage();
         int left = mContent.getPaddingLeft() + page * lp.width;
         Rect contentStart = new Rect(left, 0, left + width, height);
