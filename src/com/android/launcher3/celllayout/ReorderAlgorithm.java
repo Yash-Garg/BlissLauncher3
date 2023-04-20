@@ -70,11 +70,34 @@ public class ReorderAlgorithm {
         int[] result = new int[2];
         result = mCellLayout.findNearestAreaIgnoreOccupied(pixelX, pixelY, spanX, spanY, result);
 
+
         boolean success;
         // First we try the exact nearest position of the item being dragged,
         // we will then want to try to move this around to other neighbouring positions
-        success = mCellLayout.rearrangementExists(result[0], result[1], spanX, spanY, direction,
-                dragView, solution);
+        if (!mCellLayout.intersectingViewsExists(result[0], result[1], spanX, spanY, direction, dragView, solution)) {
+            int[] nearestResult = new int[2];
+            mCellLayout.markCellsAsOccupiedForView(dragView);
+            mCellLayout.findCellForSpan(nearestResult, spanX, spanY);
+            if (nearestResult[1] <= result[1]) {
+                result = nearestResult;
+                if (result[0] == 0) {
+                    result[0] = mCellLayout.getCountX() - 1;
+                    result[1] = result[1] - 1;
+                } else {
+                    result[0] = result[0] - 1;
+                }
+            }
+            mCellLayout.markCellsAsUnoccupiedForView(dragView);
+            if ((result[0] >= 0 && result[1] >= 0) && solution.map.containsKey(dragView)) {
+                mCellLayout.intersectingViewsExists(result[0], result[1], spanX, spanY, direction, dragView, solution);
+            } else {
+                mCellLayout.findCellForSpan(nearestResult, spanX, spanY);
+                result = nearestResult;
+                mCellLayout.intersectingViewsExists(result[0], result[1], spanX, spanY, direction, dragView, solution);
+            }
+            mCellLayout.markCellsAsUnoccupiedForView(dragView);
+        }
+        success = mCellLayout.rearrangementExists(direction, dragView, solution);
 
         if (!success) {
             // We try shrinking the widget down to size in an alternating pattern, shrink 1 in
@@ -177,6 +200,18 @@ public class ReorderAlgorithm {
         mCellLayout.getDirectionVectorForDrop(pixelX, pixelY, spanX, spanY, dragView,
                 mCellLayout.mDirectionVector);
 
+        if (!mCellLayout.isWidget() && !mCellLayout.findCellForSpan(null, minSpanX, minSpanY)) {
+            CellLayout.ItemConfiguration solution = new CellLayout.ItemConfiguration();
+            solution.cellX = solution.cellY = solution.spanX = solution.spanY = -1;
+            solution.isSolution =  true;
+            return solution;
+        }
+
+        if (true || !mCellLayout.isWidget()) {
+            mCellLayout.mDirectionVector[0] = -1;
+            mCellLayout.mDirectionVector[1] = 0;
+        }
+
         CellLayout.ItemConfiguration dropInPlaceSolution = dropInPlaceSolution(pixelX, pixelY,
                 spanX, spanY,
                 dragView);
@@ -194,9 +229,9 @@ public class ReorderAlgorithm {
         // favor a solution in which the item is not resized, but
         if (swapSolution.isSolution && swapSolution.area() >= closestSpaceSolution.area()) {
             return swapSolution;
-        } else if (closestSpaceSolution.isSolution) {
+        } else if (closestSpaceSolution.isSolution && mCellLayout.isWidget()) {
             return closestSpaceSolution;
-        } else if (dropInPlaceSolution.isSolution) {
+        } else if (dropInPlaceSolution.isSolution && mCellLayout.isWidget()) {
             return dropInPlaceSolution;
         }
         return null;

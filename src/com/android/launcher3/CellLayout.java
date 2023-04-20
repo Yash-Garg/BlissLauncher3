@@ -86,6 +86,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Stack;
 
 import foundation.e.bliss.multimode.MultiModeController;
@@ -214,6 +215,7 @@ public class CellLayout extends ViewGroup {
     // Related to accessible drag and drop
     DragAndDropAccessibilityDelegate mTouchHelper;
 
+    ArrayList<CellAndSpan> mWidgetCellAndSpanList = new ArrayList<>();
 
     public static final FloatProperty<CellLayout> SPRING_LOADED_PROGRESS =
             new FloatProperty<CellLayout>("spring_loaded_progress") {
@@ -1815,6 +1817,9 @@ public class CellLayout extends ViewGroup {
             bestXY[0] = -1;
             bestXY[1] = -1;
         }
+
+        //mTmpOccupied.findVacantCell(bestXY, spanX, spanY);
+        //findCellForSpan(bestXY, spanX, spanY);
         return bestXY;
     }
 
@@ -1839,7 +1844,8 @@ public class CellLayout extends ViewGroup {
 
     private boolean pushViewsToTempLocation(ArrayList<View> views, Rect rectOccupiedByPotentialDrop,
             int[] direction, View dragView, ItemConfiguration currentState) {
-
+        int countX = mCountX;
+        int countY = mCountY;
         ViewCluster cluster = new ViewCluster(views, currentState);
         Rect clusterRect = cluster.getBoundingRect();
         int whichEdge;
@@ -1883,11 +1889,47 @@ public class CellLayout extends ViewGroup {
         // left edge, we consider sort the views by their right edge, from right to left.
         cluster.sortConfigurationForEdgePush(whichEdge);
 
+        if (!isWidget()) {
+            if (whichEdge == ViewCluster.LEFT) {
+                //order by row desc
+                currentState.sortedViews.sort((lhs, rhs) -> {
+                    CellLayoutLayoutParams lplhs = (CellLayoutLayoutParams) lhs.getLayoutParams();
+                    CellLayoutLayoutParams lprhs = (CellLayoutLayoutParams) rhs.getLayoutParams();
+                    if (lprhs.getCellY() + lprhs.cellVSpan == lplhs.getCellY() + lplhs.cellVSpan) {
+                        return lprhs.getCellX() - lplhs.getCellX();
+                    }
+                    return (lprhs.getCellY() + lprhs.cellVSpan) - (lplhs.getCellY() + lplhs.cellVSpan);
+                });
+
+            } else if (whichEdge == ViewCluster.RIGHT) {
+                //order by row asc
+                currentState.sortedViews.sort((lhs, rhs) -> {
+                    CellLayoutLayoutParams lplhs = (CellLayoutLayoutParams) lhs.getLayoutParams();
+                    CellLayoutLayoutParams lprhs = (CellLayoutLayoutParams) rhs.getLayoutParams();
+                    if (lplhs.getCellY() + lplhs.cellVSpan == lprhs.getCellY() + lprhs.cellVSpan) {
+                        return lplhs.getCellX() - lprhs.getCellX();
+                    }
+                    return (lplhs.getCellY() + lplhs.cellVSpan) - (lprhs.getCellY() + lprhs.cellVSpan);
+                });
+            }
+
+            if (cluster.views.size() == 1) {
+                View v = cluster.views.get(0);
+                CellAndSpan c = currentState.map.get(v);
+                pushIconByRow(c, countX, countY, whichEdge);
+            }
+        }
+
         while (pushDistance > 0 && !fail) {
             for (View v: currentState.sortedViews) {
                 // For each view that isn't in the cluster, we see if the leading edge of the
                 // cluster is contacting the edge of that view. If so, we add that view to the
                 // cluster.
+                if (!isWidget()) {
+                    if (v instanceof LauncherAppWidgetHostView) {
+                        continue;
+                    }
+                }
                 if (!cluster.views.contains(v) && v != dragView) {
                     if (cluster.isViewTouchingEdge(v, whichEdge)) {
                         CellLayoutLayoutParams lp = (CellLayoutLayoutParams) v.getLayoutParams();
@@ -1901,6 +1943,10 @@ public class CellLayout extends ViewGroup {
 
                         // Adding view to cluster, mark it as not occupied.
                         mTmpOccupied.markCells(c, false);
+
+                        if (!isWidget()) {
+                            pushIconByRow(c, countX, countY, whichEdge);
+                        }
                     }
                 }
             }
@@ -2187,29 +2233,31 @@ public class CellLayout extends ViewGroup {
             // to find a solution by pushing along the perpendicular axis.
 
             // Swap the components
-            int temp = direction[1];
-            direction[1] = direction[0];
-            direction[0] = temp;
-            if (pushViewsToTempLocation(intersectingViews, occupied, direction,
-                    ignoreView, solution)) {
-                return true;
-            }
+            if (isWidget()) {
+                int temp = direction[1];
+                direction[1] = direction[0];
+                direction[0] = temp;
+                if (pushViewsToTempLocation(intersectingViews, occupied, direction,
+                        ignoreView, solution)) {
+                    return true;
+                }
 
-            // Then we try the opposite direction
-            direction[0] *= -1;
-            direction[1] *= -1;
-            if (pushViewsToTempLocation(intersectingViews, occupied, direction,
-                    ignoreView, solution)) {
-                return true;
-            }
-            // Switch the direction back
-            direction[0] *= -1;
-            direction[1] *= -1;
+                // Then we try the opposite direction
+                direction[0] *= -1;
+                direction[1] *= -1;
+                if (pushViewsToTempLocation(intersectingViews, occupied, direction,
+                        ignoreView, solution)) {
+                    return true;
+                }
+                // Switch the direction back
+                direction[0] *= -1;
+                direction[1] *= -1;
 
-            // Swap the components back
-            temp = direction[1];
-            direction[1] = direction[0];
-            direction[0] = temp;
+                // Swap the components back
+                temp = direction[1];
+                direction[1] = direction[0];
+                direction[0] = temp;
+            }
         }
         return false;
     }
@@ -2331,7 +2379,7 @@ public class CellLayout extends ViewGroup {
         return success;
     }
 
-    public boolean rearrangementExists(int cellX, int cellY, int spanX, int spanY, int[] direction,
+    public boolean intersectingViewsExists(int cellX, int cellY, int spanX, int spanY, int[] direction,
             View ignoreView, ItemConfiguration solution) {
         // Return early if get invalid cell positions
         if (cellX < 0 || cellY < 0) return false;
@@ -2349,7 +2397,7 @@ public class CellLayout extends ViewGroup {
         }
         Rect r0 = new Rect(cellX, cellY, cellX + spanX, cellY + spanY);
         Rect r1 = new Rect();
-        for (View child: solution.map.keySet()) {
+        for (View child : solution.map.keySet()) {
             if (child == ignoreView) continue;
             CellAndSpan c = solution.map.get(child);
             CellLayoutLayoutParams lp = (CellLayoutLayoutParams) child.getLayoutParams();
@@ -2358,25 +2406,33 @@ public class CellLayout extends ViewGroup {
                 if (!lp.canReorder) {
                     return false;
                 }
+
+                if (!isWidget() && child instanceof LauncherAppWidgetHostView) {
+                    return false;
+                }
                 mIntersectingViews.add(child);
             }
         }
-
         solution.intersectingViews = new ArrayList<>(mIntersectingViews);
 
-        // First we try to find a solution which respects the push mechanic. That is,
+        return !mIntersectingViews.isEmpty();
+    }
+        public boolean rearrangementExists(int[] direction, View ignoreView, ItemConfiguration solution) {
+            // First we try to find a solution which respects the push mechanic. That is,
         // we try to find a solution such that no displaced item travels through another item
         // without also displacing that item.
-        if (attemptPushInDirection(mIntersectingViews, mOccupiedRect, direction, ignoreView,
-                solution)) {
-            return true;
+        if (mIntersectingViews.size() == 1  || mIntersectingViews.isEmpty()) {
+            if (attemptPushInDirection(mIntersectingViews, mOccupiedRect, direction, ignoreView,
+                    solution)) {
+                return true;
+            }
         }
 
         // Next we try moving the views as a block, but without requiring the push mechanic.
-        if (addViewsToTempLocation(mIntersectingViews, mOccupiedRect, direction, ignoreView,
-                solution)) {
-            return true;
-        }
+        //if (addViewsToTempLocation(mIntersectingViews, mOccupiedRect, direction, ignoreView,
+         //       solution)) {
+         //   return true;
+       // }
 
         // Ok, they couldn't move as a block, let's move them individually
         for (View v : mIntersectingViews) {
@@ -2385,6 +2441,89 @@ public class CellLayout extends ViewGroup {
             }
         }
         return true;
+    }
+
+    public void reArrangeIcons(int x, int y) {
+        ItemConfiguration solution = new ItemConfiguration();
+        copyCurrentStateToSolution(solution, false);
+        View dragView = null;
+        int[] intersecting = new int[2];
+
+        if (x == 0) {
+            intersecting[0] = mCountX - 1;
+            intersecting[1] = y - 1;
+        } else {
+            intersecting[0] = x - 1;
+            intersecting[1] = y;
+        }
+
+        ArrayList<View> views = new ArrayList<>();
+        for (Map.Entry <View, CellAndSpan> keyValue : solution.map.entrySet()) {
+            CellAndSpan c = keyValue.getValue();
+            if (c.cellX == intersecting[0] && c.cellY == intersecting[1]) {
+                //   views.add(keyValue.getKey());
+            }
+
+            if (c.cellX == x && c.cellY == y) {
+                mTmpOccupied.markCells(c, false);
+                dragView = keyValue.getKey();
+                views.add(dragView);
+                pushIconByRow(c, mCountX, mCountY, ViewCluster.LEFT);
+
+                int screenId = getWorkspace().getIdForScreen(this);
+                int container = Favorites.CONTAINER_DESKTOP;
+
+                CellLayoutLayoutParams lp = (CellLayoutLayoutParams) dragView.getLayoutParams();
+                ItemInfo info = (ItemInfo) dragView.getTag();
+                info.cellX = intersecting[0];
+                lp.setCellX(info.cellX);
+                info.cellY = intersecting[1];
+                lp.setCellY(info.cellY);
+                info.spanX = lp.cellHSpan = 1;
+                info.spanY = lp.cellVSpan = 1;
+                lp.isLockedToGrid = true;
+
+                Launcher.cast(mActivity).getModelWriter().modifyItemInDatabase(info, container,
+                        screenId, info.cellX, info.cellY, info.spanX, info.spanY);
+            }
+        }
+        ViewCluster cluster = new ViewCluster(views, solution);
+        cluster.sortConfigurationForEdgePush(ViewCluster.LEFT);
+        solution.sortedViews.sort((lhs, rhs) -> {
+            CellLayoutLayoutParams lplhs = (CellLayoutLayoutParams) lhs.getLayoutParams();
+            CellLayoutLayoutParams lprhs = (CellLayoutLayoutParams) rhs.getLayoutParams();
+            if (lprhs.getCellY() + lprhs.cellVSpan == lplhs.getCellY() + lplhs.cellVSpan) {
+                return lprhs.getCellX() - lplhs.getCellX();
+            }
+            return (lprhs.getCellY() + lprhs.cellVSpan) - (lplhs.getCellY() + lplhs.cellVSpan);
+        });
+
+        for (View v: solution.sortedViews) {
+            CellAndSpan c = solution.map.get(v);
+            CellLayoutLayoutParams lp = (CellLayoutLayoutParams) v.getLayoutParams();
+            if (!lp.canReorder) {
+                // The push solution includes the all apps button, this is not viable.
+                break;
+            }
+            if (cluster.isViewTouchingEdge(v, ViewCluster.LEFT)) {
+                if (!cluster.views.contains(v)) {
+                    cluster.addView(v);
+                }
+                mTmpOccupied.markCells(c, false);
+                pushIconByRow(c, mCountX, mCountY,ViewCluster.LEFT);
+            }
+        }
+        cluster.shift(ViewCluster.LEFT, 1);
+
+        solution.cellX = intersecting[0];
+        solution.cellY = intersecting[1];
+        solution.spanX = 1;
+        solution.spanY = 1;
+        solution.isSolution = true;
+
+        if (dragView != null) {
+            performReorder(solution, dragView, MODE_ON_DROP);
+        }
     }
 
     public ReorderAlgorithm createReorderAlgorithm() {
@@ -2399,6 +2538,7 @@ public class CellLayout extends ViewGroup {
     }
 
     public void copyCurrentStateToSolution(ItemConfiguration solution, boolean temp) {
+        mWidgetCellAndSpanList.clear();
         int childCount = mShortcutsAndWidgets.getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = mShortcutsAndWidgets.getChildAt(i);
@@ -2408,6 +2548,9 @@ public class CellLayout extends ViewGroup {
                 c = new CellAndSpan(lp.getTmpCellX(), lp.getTmpCellY(), lp.cellHSpan, lp.cellVSpan);
             } else {
                 c = new CellAndSpan(lp.getCellX(), lp.getCellY(), lp.cellHSpan, lp.cellVSpan);
+            }
+            if (child instanceof LauncherAppWidgetHostView) {
+                mWidgetCellAndSpanList.add(c);
             }
             solution.add(child, c);
         }
@@ -2618,6 +2761,34 @@ public class CellLayout extends ViewGroup {
         return mOccupied.findVacantCell(cellXY, spanX, spanY);
     }
 
+    public int[] getLastOccupiedCells() {
+        int[] loc = new int[]{-1, -1};
+        out:
+        for (int y = mCountY - 1; y >= 0; y--) {
+            for (int x = mCountX - 1; x >= 0; x--) {
+                if (isOccupied(x, y)) {
+                    loc[0] = x;
+                    loc[1] = y;
+                    break out;
+                }
+            }
+        }
+        /*
+        if (loc[0] >= 0 && loc[1] >= 0) {
+            if (loc[0] == mCountX - 1) {
+                loc[0] = 0;
+                loc[1]++;
+                if (loc[1] > mCountY - 1) {
+                    return null;
+                }
+            } else {
+                loc[0] = loc[0] + 1;
+            }
+        }
+         */
+        return loc;
+    }
+
     /**
      * A drag event has begun over this layout.
      * It may have begun over this layout (in which case onDragChild is called first),
@@ -2752,6 +2923,62 @@ public class CellLayout extends ViewGroup {
     @Override
     protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
         return new CellLayoutLayoutParams(p);
+    }
+
+
+    public boolean isWidget() {
+        return Workspace.isWidget;
+    }
+
+    private void pushIconByRow(CellAndSpan c, int countX, int countY, int whichEdge) {
+        if (whichEdge == ViewCluster.LEFT) {
+            if (c.cellX == 0 && c.cellY - c.spanY >= 0) {
+                c.cellY = c.cellY - c.spanY;
+                c.cellX = countX;
+            }
+            int result = isCellInLauncherAppWidget(c.cellX - 1, c.cellY, ViewCluster.LEFT);
+            if (result != -1) {
+                c.cellX = result;
+                while (c.cellX == 0 && c.cellY - c.spanY >= 0) {
+                    c.cellY = c.cellY - c.spanY;
+                    c.cellX = countX;
+                    int cellX = isCellInLauncherAppWidget(c.cellX - 1, c.cellY, ViewCluster.LEFT);
+                    if (cellX != -1) {
+                        c.cellX = cellX;
+                    }
+                }
+            }
+        } else if (whichEdge == ViewCluster.RIGHT) {
+            if (c.cellX == countX - 1 && c.cellY + c.spanY <= countY - 1) {
+                c.cellY = c.cellY + c.spanY;
+                c.cellX = -1;
+            }
+            int result = isCellInLauncherAppWidget(c.cellX + 1, c.cellY, ViewCluster.RIGHT);
+            if (result != -1) {
+                c.cellX = result;
+                while (c.cellX == countX - 1 && c.cellY + c.spanY <= countY - 1) {
+                    c.cellY = c.cellY + c.spanY;
+                    c.cellX = -1;
+                    int cellX = isCellInLauncherAppWidget(c.cellX + 1, c.cellY, ViewCluster.RIGHT);
+                    if (cellX != -1) {
+                        c.cellX = cellX;
+                    }
+                }
+            }
+        }
+    }
+
+    private int isCellInLauncherAppWidget(int x, int y, int whichEdge) {
+        for (CellAndSpan c : mWidgetCellAndSpanList) {
+            if (x >= c.cellX && x < c.cellX + c.spanX && y >= c.cellY && y < c.cellY + c.spanY) {
+                if (whichEdge == ViewCluster.LEFT) {
+                    return c.cellX;
+                } else if (whichEdge == ViewCluster.RIGHT) {
+                    return c.cellX + c.spanX - 1;
+                }
+            }
+        }
+        return -1;
     }
 
     // This class stores info for two purposes:
