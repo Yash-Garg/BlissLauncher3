@@ -20,7 +20,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -29,7 +28,6 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import com.android.launcher3.folder.Folder;
-import com.android.launcher3.pageindicators.PageIndicatorDots;
 
 import androidx.annotation.NonNull;
 
@@ -56,6 +54,7 @@ public class Hotseat extends CellLayout implements Insettable, OffsetParent {
     private boolean mSendTouchToWorkspace;
 
     private final View mQsb;
+    public boolean drawBlur;
 
     public Hotseat(Context context) {
         this(context, null);
@@ -70,6 +69,7 @@ public class Hotseat extends CellLayout implements Insettable, OffsetParent {
 
         mQsb = LayoutInflater.from(context).inflate(R.layout.search_container_hotseat, this, false);
         mBlurDelegate = new BlurViewDelegate(this, BlurWallpaperProvider.Companion.getBlurConfigDock(), null);
+        drawBlur = true;
         setWillNotDraw(false);
         addView(mQsb);
     }
@@ -146,6 +146,14 @@ public class Hotseat extends CellLayout implements Insettable, OffsetParent {
     }
 
     @Override
+    protected void onDraw(Canvas canvas) {
+        if (mBlurDelegate != null && drawBlur) {
+            mBlurDelegate.draw(canvas);
+        }
+        super.onDraw(canvas);
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
         // See comment in #onInterceptTouchEvent
         if (mSendTouchToWorkspace) {
@@ -214,14 +222,6 @@ public class Hotseat extends CellLayout implements Insettable, OffsetParent {
      */
     public View getQsb() {
         return mQsb;
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        if (mBlurDelegate != null) {
-            mBlurDelegate.draw(canvas);
-        }
-        super.onDraw(canvas);
     }
 
     public Workspace<?> getWorkspace() {
