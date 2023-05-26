@@ -238,6 +238,7 @@ import java.util.stream.Stream;
 import foundation.e.bliss.LauncherAppMonitor;
 import foundation.e.bliss.blur.BlurBackgroundView;
 import foundation.e.bliss.blur.BlurWallpaperProvider;
+import foundation.e.bliss.multimode.MultiModeController;
 
 /**
  * Default launcher application.
@@ -3091,6 +3092,8 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
      * Shows the default options popup
      */
     public void showDefaultOptions(float x, float y) {
+        if (MultiModeController.isSingleLayerMode()) return;
+
         OptionsPopupView.show(this, getPopupTarget(x, y), OptionsPopupView.getOptions(this),
                 false);
     }
