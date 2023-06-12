@@ -340,6 +340,10 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
                 }
             };
 
+    protected View getFirstPagePinnedItem() {
+        return mQsb;
+    }
+
     @Override
     public void setInsets(Rect insets) {
         DeviceProfile grid = mLauncher.getDeviceProfile();
