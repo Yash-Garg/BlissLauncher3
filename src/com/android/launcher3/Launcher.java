@@ -241,6 +241,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import foundation.e.bliss.LauncherAppMonitor;
+import foundation.e.bliss.multimode.MultiModeController;
 
 /**
  * Default launcher application.
@@ -1366,7 +1367,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         mAllAppsController.setupViews(mScrimView, mAppsView);
 
         if (SHOW_DOT_PAGINATION.get()) {
-            mWorkspace.getPageIndicator().setShouldAutoHide(true);
+            mWorkspace.getPageIndicator().setShouldAutoHide(!MultiModeController.isSingleLayerMode());
             mWorkspace.getPageIndicator().setPaintColor(
                     Themes.getAttrBoolean(this, R.attr.isWorkspaceDarkText)
                             ? Color.BLACK
