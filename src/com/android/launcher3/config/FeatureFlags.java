@@ -199,7 +199,7 @@ public final class FeatureFlags {
             "ENABLE_ENFORCED_ROUNDED_CORNERS", true, "Enforce rounded corners on all App Widgets");
 
     public static final BooleanFlag NOTIFY_CRASHES = getDebugFlag(
-            270393108, "NOTIFY_CRASHES", false,
+            270393108, "NOTIFY_CRASHES", true,
             "Sends a notification whenever launcher encounters an uncaught exception.");
 
     public static final BooleanFlag ENABLE_WALLPAPER_SCRIM = getDebugFlag(270393604,
@@ -219,7 +219,7 @@ public final class FeatureFlags {
             "Enables home animation to icon when user swipes back.");
 
     public static final BooleanFlag ENABLE_ICON_LABEL_AUTO_SCALING = getDebugFlag(270393294,
-            "ENABLE_ICON_LABEL_AUTO_SCALING", true,
+            "ENABLE_ICON_LABEL_AUTO_SCALING", false,
             "Enables scaling/spacing for icon labels to make more characters visible");
 
     public static final BooleanFlag ENABLE_ALL_APPS_BUTTON_IN_HOTSEAT = getDebugFlag(270393897,
