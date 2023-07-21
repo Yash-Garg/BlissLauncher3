@@ -222,7 +222,7 @@ public final class FeatureFlags {
             "ENABLE_LOCAL_RECOMMENDED_WIDGETS_FILTER", true,
             "Enables a local filter for recommended widgets.");
 
-    public static final BooleanFlag NOTIFY_CRASHES = getDebugFlag("NOTIFY_CRASHES", false,
+    public static final BooleanFlag NOTIFY_CRASHES = getDebugFlag("NOTIFY_CRASHES", true,
             "Sends a notification whenever launcher encounters an uncaught exception.");
 
     public static final BooleanFlag ENABLE_WALLPAPER_SCRIM = getDebugFlag(
@@ -242,7 +242,7 @@ public final class FeatureFlags {
             "Enables home animation to icon when user swipes back.");
 
     public static final BooleanFlag ENABLE_ICON_LABEL_AUTO_SCALING = getDebugFlag(
-            "ENABLE_ICON_LABEL_AUTO_SCALING", true,
+            "ENABLE_ICON_LABEL_AUTO_SCALING", false,
             "Enables scaling/spacing for icon labels to make more characters visible");
 
     public static void initialize(Context context) {
