@@ -372,7 +372,7 @@ public class GridSizeMigrationUtil {
             @NonNull final Context context, final int screenId, final int trgX, final int trgY,
             @NonNull final List<DbEntry> sortedItemsToPlace, final boolean matchingScreenIdOnly) {
         final GridOccupancy occupied = new GridOccupancy(trgX, trgY);
-        final int adjScreenId = screenId == 0 && FeatureFlags.QSB_ON_FIRST_SCREEN
+        final int adjScreenId = screenId == 0 && FeatureFlags.QSB_ON_FIRST_SCREEN.get()
                 ? 1 /* smartspace */ : screenId; // Skip QSB screen
         final Point trg = new Point(trgX, trgY);
         final Point next = new Point(0, 0);

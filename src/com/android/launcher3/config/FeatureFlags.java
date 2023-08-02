@@ -20,6 +20,7 @@ import static com.android.launcher3.uioverrides.flags.FlagsFactory.getDebugFlag;
 import static com.android.launcher3.uioverrides.flags.FlagsFactory.getReleaseFlag;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -64,7 +65,11 @@ public final class FeatureFlags {
      * @deprecated Use {@link BuildConfig#QSB_ON_FIRST_SCREEN} directly
      */
     @Deprecated
-    public static final boolean QSB_ON_FIRST_SCREEN = BuildConfig.QSB_ON_FIRST_SCREEN;
+    public static class QSB_ON_FIRST_SCREEN {
+        public static boolean get() {
+            return  MultiModeController.isSingleLayerMode();
+        }
+    }
 
     /**
      * Feature flag to handle define config changes dynamically instead of killing the process.

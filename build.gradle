@@ -72,7 +72,6 @@ android {
         versionCode 300_00_00
         versionName "3.0.0-alpha2"
         buildConfigField "boolean", "IS_STUDIO_BUILD", "false"
-        buildConfigField "boolean", "QSB_ON_FIRST_SCREEN", "true"
         buildConfigField "boolean", "IS_DEBUG_DEVICE", "false"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

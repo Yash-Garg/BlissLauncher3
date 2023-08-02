@@ -925,7 +925,7 @@ public class LauncherProvider extends ContentProvider {
                             Favorites.SCREEN, IntArray.wrap(-777, -778)), null);
                 }
                 case 30: {
-                    if (FeatureFlags.QSB_ON_FIRST_SCREEN) {
+                    if (FeatureFlags.QSB_ON_FIRST_SCREEN.get()) {
                         // Clean up first row in screen 0 as it might contain junk data.
                         Log.d(TAG, "Cleaning up first row");
                         db.delete(Favorites.getFavoritesTableName(),
