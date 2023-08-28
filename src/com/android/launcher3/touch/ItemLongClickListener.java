@@ -23,6 +23,7 @@ import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.LauncherState.OVERVIEW;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_ALLAPPS_ITEM_LONG_PRESSED;
 
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 
@@ -50,7 +51,18 @@ public class ItemLongClickListener {
     public static final OnLongClickListener INSTANCE_ALL_APPS =
             ItemLongClickListener::onAllAppsItemLongClick;
 
-    private static boolean onWorkspaceItemLongClick(View v) {
+    public static final View.OnTouchListener INSTANCE_WORKSPACE_WOBBLE =
+            ItemLongClickListener::onTouchTest;
+
+    public static boolean onTouchTest(View v, MotionEvent motionEvent) {
+        int action = motionEvent.getAction();
+        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_DOWN) {
+            return false;
+        }
+        return onWorkspaceItemLongClick(v);
+    }
+
+    public static boolean onWorkspaceItemLongClick(View v) {
         if (v instanceof LauncherAppWidgetHostView) {
             TestLogging.recordEvent(TestProtocol.SEQUENCE_MAIN, "Widgets.onLongClick");
         } else {
