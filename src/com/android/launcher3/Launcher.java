@@ -22,6 +22,7 @@ import static android.content.pm.ActivityInfo.CONFIG_UI_MODE;
 import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO;
 import static android.view.accessibility.AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED;
 
+import static androidx.activity.result.ActivityResultCallerKt.registerForActivityResult;
 import static com.android.launcher3.AbstractFloatingView.TYPE_ALL;
 import static com.android.launcher3.AbstractFloatingView.TYPE_FOLDER;
 import static com.android.launcher3.AbstractFloatingView.TYPE_ICON_SURFACE;
@@ -60,6 +61,7 @@ import static com.android.launcher3.states.RotationHelper.REQUEST_NONE;
 import static com.android.launcher3.testing.TestProtocol.BAD_STATE;
 import static com.android.launcher3.util.ItemInfoMatcher.forFolderMatch;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -118,6 +120,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.app.ActivityCompat;
 
 import com.android.launcher3.DropTarget.DragObject;
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
@@ -230,6 +233,8 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import foundation.e.bliss.LauncherAppMonitor;
+import foundation.e.bliss.blur.BlurBackgroundView;
+import foundation.e.bliss.blur.BlurWallpaperProvider;
 
 /**
  * Default launcher application.
@@ -253,7 +258,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     private static final int REQUEST_BIND_APPWIDGET = 11;
     public static final int REQUEST_BIND_PENDING_APPWIDGET = 12;
     public static final int REQUEST_RECONFIGURE_APPWIDGET = 13;
-
+    private static final int STORAGE_PERMISSION_REQUEST_CODE = 586;
     private static final int REQUEST_PERMISSION_CALL_PHONE = 14;
 
     private static final float BOUNCE_ANIMATION_TENSION = 1.3f;
@@ -385,6 +390,8 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
 
     private LauncherAppMonitor mAppMonitor;
 
+    public BlurBackgroundView mBlurLayer;
+
     @Override
     @TargetApi(Build.VERSION_CODES.S)
     protected void onCreate(Bundle savedInstanceState) {
@@ -459,6 +466,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         mOldConfig = new Configuration(getResources().getConfiguration());
         mModel = app.getModel();
 
+        BlurWallpaperProvider.Companion.getInstance(this);
         mRotationHelper = new RotationHelper(this);
         InvariantDeviceProfile idp = app.getInvariantDeviceProfile();
         initDeviceProfile(idp);
@@ -525,12 +533,19 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         if (mLauncherCallbacks != null) {
             mLauncherCallbacks.onCreate(savedInstanceState);
         }
+
+        requestPermissions(new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE},
+                STORAGE_PERMISSION_REQUEST_CODE);
+
         mOverlayManager = getDefaultOverlay();
         PluginManagerWrapper.INSTANCE.get(this).addPluginListener(this,
                 OverlayPlugin.class, false /* allowedMultiple */);
 
         mRotationHelper.initialize();
         mAppMonitor.onLauncherCreated();
+        mBlurLayer = findViewById(R.id.blur_layer);
+        mBlurLayer.setAlpha(0f);
+
         TraceHelper.INSTANCE.endSection(traceToken);
 
         mUserChangedCallbackCloseable = UserCache.INSTANCE.get(this).addUserChangeListener(
@@ -906,6 +921,10 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 // TODO: Show a snack bar with link to settings
                 Toast.makeText(this, getString(R.string.msg_no_phone_permission,
                         getString(R.string.derived_app_name)), Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == STORAGE_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                BlurWallpaperProvider.Companion.getInstanceNoCreate().updateAsync();
             }
         }
     }

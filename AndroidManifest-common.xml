@@ -17,8 +17,8 @@
 ** limitations under the License.
 */
 -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.android.launcher3">
 
     <!--
@@ -73,6 +73,7 @@
         android:fullBackupContent="@xml/backupscheme"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
+        tools:replace="android:label"
         android:label="@string/derived_app_name"
         android:usesCleartextTraffic="true"
         android:allowClearUserData="true"

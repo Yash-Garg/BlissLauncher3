@@ -47,6 +47,8 @@ import com.android.systemui.shared.system.WallpaperManagerCompat;
 import java.io.PrintWriter;
 import java.util.function.Consumer;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * Controls blur and wallpaper zoom, for the Launcher surface only.
  */
@@ -313,7 +315,11 @@ public class DepthController implements StateHandler<LauncherState>,
         depth = Math.max(depth, mOverlayScrollProgress);
         IBinder windowToken = mLauncher.getRootView().getWindowToken();
         if (windowToken != null) {
-            mWallpaperManager.setWallpaperZoomOut(windowToken, depth);
+            if (MultiModeController.isSingleLayerMode()) {
+                mWallpaperManager.setWallpaperZoomOut(windowToken, 1);
+            } else {
+                mWallpaperManager.setWallpaperZoomOut(windowToken, depth / 3);
+            }
         }
 
         if (supportsBlur) {
