@@ -46,6 +46,7 @@ class MultiModeController(val context: Context, val monitor: LauncherAppMonitor)
                     BlissPrefs.PREF_SINGLE_LAYER_MODE -> {
                         monitor.launcher.model.forceReload()
                     }
+                    BlissPrefs.PREF_NOTIF_COUNT -> idp.onConfigChanged(context)
                     else -> Unit
                 }
             }
