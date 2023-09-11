@@ -253,6 +253,11 @@ public class DeviceProfile {
         aspectRatio = ((float) Math.max(widthPx, heightPx)) / Math.min(widthPx, heightPx);
         boolean isTallDevice = Float.compare(aspectRatio, TALL_DEVICE_ASPECT_RATIO_THRESHOLD) >= 0;
 
+        inv.iconSize[InvariantDeviceProfile.INDEX_DEFAULT] *= 1.3F;
+        inv.iconSize[InvariantDeviceProfile.INDEX_LANDSCAPE] *= 1.3F;
+        inv.iconSize[InvariantDeviceProfile.INDEX_TWO_PANEL_PORTRAIT] *= 1.3F;
+        inv.iconSize[InvariantDeviceProfile.INDEX_TWO_PANEL_LANDSCAPE] *= 1.3F;
+
         // Some more constants
         context = getContext(context, info, isVerticalBarLayout()
                 ? Configuration.ORIENTATION_LANDSCAPE
@@ -460,7 +465,7 @@ public class DeviceProfile {
             }
 
             updateHotseatIconSize(iconSizePx);
-
+//
             // Recalculate the available dimensions using the new hotseat size.
             updateAvailableDimensions(res);
         }
