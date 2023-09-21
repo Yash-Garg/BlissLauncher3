@@ -2074,6 +2074,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         }
 
         if (getWorkspace().isWobbling()) {
+            getWorkspace().wobbleLayouts(false);
             return;
         }
 

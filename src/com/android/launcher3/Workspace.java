@@ -2733,13 +2733,6 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         }
     }
 
-    @Override
-    public void onBackInvoked() {
-        if (isWobbling()) {
-            wobbleLayouts(false);
-        }
-    }
-
     class ReorderAlarmListener implements OnAlarmListener {
         final float[] dragViewCenter;
         final int minSpanX, minSpanY, spanX, spanY;
