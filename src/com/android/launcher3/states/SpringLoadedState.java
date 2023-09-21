@@ -25,6 +25,8 @@ import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.Workspace;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * Definition for spring loaded state used during drag and drop.
  */
@@ -46,6 +48,10 @@ public class SpringLoadedState extends LauncherState {
 
     @Override
     public ScaleAndTranslation getWorkspaceScaleAndTranslation(Launcher launcher) {
+        if (MultiModeController.isSingleLayerMode()) {
+            return super.getWorkspaceScaleAndTranslation(launcher);
+        }
+
         DeviceProfile grid = launcher.getDeviceProfile();
         Workspace ws = launcher.getWorkspace();
         if (ws.getChildCount() == 0) {
@@ -78,6 +84,9 @@ public class SpringLoadedState extends LauncherState {
 
     @Override
     protected float getDepthUnchecked(Context context) {
+        if (MultiModeController.isSingleLayerMode()) {
+            return 0;
+        }
         return 0.5f;
     }
 
@@ -88,6 +97,9 @@ public class SpringLoadedState extends LauncherState {
 
     @Override
     public float getWorkspaceBackgroundAlpha(Launcher launcher) {
+        if (MultiModeController.isSingleLayerMode()) {
+            return 0;
+        }
         return 0.2f;
     }
 }

@@ -527,7 +527,9 @@ public class CellLayout extends ViewGroup {
     public void setSpringLoadedProgress(float progress) {
         if (Float.compare(progress, mSpringLoadedProgress) != 0) {
             mSpringLoadedProgress = progress;
-            updateBgAlpha();
+            if (!MultiModeController.isSingleLayerMode()) {
+                updateBgAlpha();
+            }
             setGridAlpha(progress);
         }
     }
@@ -552,7 +554,9 @@ public class CellLayout extends ViewGroup {
     public void setScrollProgress(float progress) {
         if (Float.compare(Math.abs(progress), mScrollProgress) != 0) {
             mScrollProgress = Math.abs(progress);
-            updateBgAlpha();
+            if (!MultiModeController.isSingleLayerMode()) {
+                updateBgAlpha();
+            }
         }
     }
 
@@ -591,7 +595,7 @@ public class CellLayout extends ViewGroup {
             }
         }
 
-        if (mVisualizeDropLocation) {
+        if (mVisualizeDropLocation && !MultiModeController.isSingleLayerMode()) {
             for (int i = 0; i < mDragOutlines.length; i++) {
                 final float alpha = mDragOutlineAlphas[i];
                 if (alpha <= 0) continue;

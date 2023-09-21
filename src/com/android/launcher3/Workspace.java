@@ -2625,6 +2625,7 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
             pageIndexesToVerify.add(nextPage + 2);
         }
 
+        int iconOffset = mLauncher.getDeviceProfile().iconSizePx / 2;
         int touchX = (int) Math.min(centerX, d.x);
         int touchY = d.y;
 
@@ -2632,6 +2633,18 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         for (int pageIndex : pageIndexesToVerify) {
             if (layout != null || isPageInTransition()) {
                 break;
+            }
+
+            if (((pageIndex < nextPage) && !mIsRtl) || (pageIndex > nextPage && mIsRtl)) {
+                if (MultiModeController.isSingleLayerMode()) {
+                    touchX = (int) Math.min(d.x, centerX);
+                    touchX -= iconOffset;
+                }
+            } else {
+                if (MultiModeController.isSingleLayerMode()) {
+                    touchX = (int) Math.max(d.x, centerX);
+                    touchX += iconOffset;
+                }
             }
             layout = verifyInsidePage(pageIndex, touchX, touchY);
         }
