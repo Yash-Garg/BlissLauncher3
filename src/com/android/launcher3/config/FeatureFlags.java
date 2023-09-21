@@ -26,6 +26,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * Defines a set of flags used to control various launcher behaviors.
  *
@@ -52,8 +54,11 @@ public final class FeatureFlags {
      * Enable moving the QSB on the 0th screen of the workspace. This is not a configuration feature
      * and should be modified at a project level.
      */
-    public static final boolean QSB_ON_FIRST_SCREEN = true;
-
+    public static class QSB_ON_FIRST_SCREEN {
+        public static boolean get() {
+            return  MultiModeController.isSingleLayerMode();
+        }
+    }
     /**
      * Feature flag to handle define config changes dynamically instead of killing the process.
      *

@@ -66,6 +66,7 @@ import com.android.quickstep.SysUINavigationMode;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
+import foundation.e.bliss.multimode.MultiModeController;
 import foundation.e.bliss.utils.Logger;
 
 /**
@@ -732,7 +733,7 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
         // unless they were set to WRAP_CONTENT
         if (DEBUG) Log.d(TAG, "PagedView.onMeasure(): " + widthSize + ", " + heightSize);
 
-        if (this instanceof Workspace) {
+        if (this instanceof Workspace && MultiModeController.isSingleLayerMode()) {
             for (int i = 0; i < getChildCount(); i++) {
                 final View child = getPageAt(i);
                 if (child.getVisibility() != GONE) {

@@ -2301,11 +2301,11 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     @Override
     public void bindScreens(IntArray orderedScreenIds) {
         int firstScreenPosition = 0;
-        if (FeatureFlags.QSB_ON_FIRST_SCREEN &&
+        if (FeatureFlags.QSB_ON_FIRST_SCREEN.get() &&
                 orderedScreenIds.indexOf(Workspace.FIRST_SCREEN_ID) != firstScreenPosition) {
             orderedScreenIds.removeValue(Workspace.FIRST_SCREEN_ID);
             orderedScreenIds.add(firstScreenPosition, Workspace.FIRST_SCREEN_ID);
-        } else if (!FeatureFlags.QSB_ON_FIRST_SCREEN && orderedScreenIds.isEmpty()) {
+        } else if (!FeatureFlags.QSB_ON_FIRST_SCREEN.get() && orderedScreenIds.isEmpty()) {
             // If there are no screens, we need to have an empty screen
             mWorkspace.addExtraEmptyScreens();
         }
@@ -2329,8 +2329,8 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         int count = orderedScreenIds.size();
         for (int i = 0; i < count; i++) {
             int screenId = orderedScreenIds.get(i);
-            if ((FeatureFlags.QSB_ON_FIRST_SCREEN && screenId == Workspace.FIRST_SCREEN_ID)
-                    || FeatureFlags.QSB_ON_FIRST_SCREEN && screenId == Workspace.SECOND_SCREEN_ID) {
+            if ((FeatureFlags.QSB_ON_FIRST_SCREEN.get() && screenId == Workspace.FIRST_SCREEN_ID)
+                    || FeatureFlags.QSB_ON_FIRST_SCREEN.get() && screenId == Workspace.SECOND_SCREEN_ID) {
                 // No need to bind the first screen, as its always bound.
                 continue;
             }
