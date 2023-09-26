@@ -1243,7 +1243,7 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         final DeviceProfile dp = mLauncher.getDeviceProfile();
         float progress = (float) scrollX / dp.availableWidthPx;
 
-        if (progress >= 0.999)
+        if (progress >= 0.98)
             progress = 1;
         if (progress <= 0.001)
             progress = 0;
@@ -1436,10 +1436,14 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
 
     @Override
     public void setCurrentPage(int currentPage, int overridePrevPage) {
+        Hotseat hotseat = getHotseat();
         if (currentPage == FIRST_SCREEN_ID) {
-            Hotseat hotseat = getHotseat();
             if (hotseat.getTranslationY() >= 0) {
                 hotseat.setForcedTranslationY(hotseat.getHeight() + getPageIndicator().getHeight());
+            }
+        } else {
+            if (hotseat.getTranslationY() != 0) {
+                hotseat.setForcedTranslationY(0);
             }
         }
         super.setCurrentPage(currentPage, overridePrevPage);
