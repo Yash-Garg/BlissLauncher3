@@ -104,6 +104,7 @@ import com.android.launcher3.popup.PopupContainerWithArrow;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StateManager.StateHandler;
 import com.android.launcher3.states.StateAnimationConfig;
+import com.android.launcher3.touch.ItemLongClickListener;
 import com.android.launcher3.touch.WorkspaceTouchListener;
 import com.android.launcher3.util.EdgeEffectCompat;
 import com.android.launcher3.util.Executors;
@@ -3608,6 +3609,11 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
 
             mapOverItems((info, view) -> {
                 view.setLayerType(LAYER_TYPE_HARDWARE, null);
+
+                if (!(view instanceof FolderIcon) && view instanceof BubbleTextView) {
+                    view.setOnTouchListener(ItemLongClickListener.INSTANCE_WORKSPACE_WOBBLE);
+                }
+
                 if (excludeDraggingView && mDragObjectInfo != null) {
                     if ((mDragObjectInfo instanceof WorkspaceItemInfo ||
                             mDragObjectInfo instanceof FolderInfo)
@@ -3632,6 +3638,7 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         } else {
             wobbleExpireAlarm.cancelAlarm();
             mapOverItems((info, view) -> {
+                view.setOnTouchListener(null);
                 view.setLayerType(LAYER_TYPE_NONE, null);
                 view.clearAnimation();
                 if (view instanceof BubbleTextView) {
