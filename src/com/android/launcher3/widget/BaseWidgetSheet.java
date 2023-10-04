@@ -46,6 +46,8 @@ import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.AbstractSlideInView;
 import com.android.launcher3.views.ArrowTipView;
 
+import foundation.e.bliss.multimode.MultiModeController;
+
 /**
  * Base class for various widgets popup
  */
@@ -304,6 +306,8 @@ public abstract class BaseWidgetSheet extends AbstractSlideInView<Launcher>
 
     /** Returns {@code true} if tip has previously been shown on any of {@link BaseWidgetSheet}. */
     protected boolean hasSeenEducationTip() {
+        if (MultiModeController.isSingleLayerMode()) return true;
+
         return mActivityContext.getSharedPrefs().getBoolean(KEY_WIDGETS_EDUCATION_TIP_SEEN, false)
                 || Utilities.IS_RUNNING_IN_TEST_HARNESS;
     }

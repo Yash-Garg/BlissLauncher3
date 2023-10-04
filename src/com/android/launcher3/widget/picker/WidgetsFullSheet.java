@@ -75,6 +75,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
+import foundation.e.bliss.multimode.MultiModeController;
 import foundation.e.bliss.widgets.WidgetContainer.WidgetFragment;
 
 /**
@@ -724,6 +725,8 @@ public class WidgetsFullSheet extends BaseWidgetSheet
 
     /** Returns {@code true} if education dialog has previously been shown. */
     protected boolean hasSeenEducationDialog() {
+        if (MultiModeController.isSingleLayerMode()) return true;
+
         return mActivityContext.getSharedPrefs()
                 .getBoolean(KEY_WIDGETS_EDUCATION_DIALOG_SEEN, false)
                 || Utilities.IS_RUNNING_IN_TEST_HARNESS;
