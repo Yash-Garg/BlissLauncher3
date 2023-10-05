@@ -2635,7 +2635,7 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
             pageIndexesToVerify.add(nextPage + 2);
         }
 
-        int iconOffset = mLauncher.getDeviceProfile().iconSizePx / 2;
+        int iconOffset = mLauncher.getDeviceProfile().iconSizePx / 3;
         int touchX = (int) Math.min(centerX, d.x);
         int touchY = d.y;
 
@@ -2682,7 +2682,8 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
      * Returns the child CellLayout if the point is inside the page coordinates, null otherwise.
      */
     private CellLayout verifyInsidePage(int pageNo, float x, float y) {
-        if (pageNo >= 0 && pageNo < getPageCount()) {
+        int initialPage = MultiModeController.isSingleLayerMode() ? 1 : 0;
+        if (pageNo >= initialPage && pageNo < getPageCount()) {
             CellLayout cl = (CellLayout) getChildAt(pageNo);
             if (x >= cl.getLeft() && x <= cl.getRight()
                     && y >= cl.getTop() && y <= cl.getBottom()) {
