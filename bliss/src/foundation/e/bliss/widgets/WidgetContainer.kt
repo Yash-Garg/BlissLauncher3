@@ -154,15 +154,12 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) : FrameLayout(cont
                 loadWidgets()
                 mWidgetHost.startListening()
             }
-            Log.e("lulz", "container $container")
-            Log.e("lulz", "container root ${container?.rootView}")
+
             return mWrapper
         }
 
         override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
             super.onViewCreated(view, savedInstanceState)
-            Log.e("lulz", "root view ${view?.rootView}")
-            Log.e("lulz", "wrapper  ${mWrapper.rootView}")
         }
 
         private fun loadWidgets() {

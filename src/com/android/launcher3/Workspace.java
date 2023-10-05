@@ -1285,7 +1285,7 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         ((PageIndicatorDots) getPageIndicator()).setForcedTranslationY(dockTranslationY);
         CellLayout firstScreen = mWorkspaceScreens.get(FIRST_SCREEN_ID);
         firstScreen.setPadding(
-                firstScreen.getPaddingLeft(), firstScreen.getPaddingTop(), firstScreen.getPaddingRight(),
+                0, 0, 0,
                 progress != 0 ? (int) qsbPadding : firstScreen.getPaddingBottom());
 
         if (getCurrentPage() != 0) {

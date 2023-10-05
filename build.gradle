@@ -69,8 +69,8 @@ android {
     useLibrary "android.test.mock"
 
     defaultConfig {
-        versionCode 300_00_00
-        versionName "3.0.0-alpha2"
+        versionCode 300_00_10
+        versionName "3.0.1-beta"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true

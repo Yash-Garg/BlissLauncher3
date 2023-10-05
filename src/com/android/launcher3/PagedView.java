@@ -759,7 +759,7 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
                             childHeightMode = MeasureSpec.EXACTLY;
                         }
 
-                        childWidth = getPageWidthSize(widthSize);
+                        childWidth = getPageWidthSize(widthSize) - horizontalPadding;
                         childHeight = heightSize - mInsets.top - mInsets.bottom - verticalPadding;
                     } else {
                         childWidthMode = MeasureSpec.EXACTLY;
