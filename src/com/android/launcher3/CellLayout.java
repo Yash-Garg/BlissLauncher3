@@ -1817,9 +1817,6 @@ public class CellLayout extends ViewGroup {
             bestXY[0] = -1;
             bestXY[1] = -1;
         }
-
-        //mTmpOccupied.findVacantCell(bestXY, spanX, spanY);
-        //findCellForSpan(bestXY, spanX, spanY);
         return bestXY;
     }
 
