@@ -48,6 +48,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
@@ -118,6 +119,7 @@ import com.android.launcher3.util.PackageUserKey;
 import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.util.Thunk;
 import com.android.launcher3.util.WallpaperOffsetInterpolator;
+import com.android.launcher3.views.FloatingIconView;
 import com.android.launcher3.widget.LauncherAppWidgetHost;
 import com.android.launcher3.widget.LauncherAppWidgetHost.ProviderChangedListener;
 import com.android.launcher3.widget.LauncherAppWidgetHostView;
@@ -563,6 +565,9 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         mDragObjectInfo = null;
         if (isWobbling()) {
             wobbleLayouts(true);
+        }
+        if (!wobbleExpireAlarm.alarmPending()) {
+            wobbleExpireAlarm.setAlarm(WOBBLE_EXPIRATION_TIMEOUT);
         }
     }
 
@@ -1090,10 +1095,10 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        return shouldConsumeTouch(v);
+        return shouldConsumeTouch(v, event);
     }
 
-    private boolean shouldConsumeTouch(View v) {
+    private boolean shouldConsumeTouch(View v, MotionEvent event) {
         return !workspaceIconsCanBeDragged()
                 || (!workspaceInModalState() && !isVisible(v));
     }
@@ -1164,6 +1169,29 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
             super.determineScrollingStart(ev);
         }
     }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        int[] cell = new int[2];
+        final CellLayout cellLayout = (CellLayout) getChildAt(getCurrentPage());
+        cellLayout.pointToCellExact((int) ev.getX(), (int) ev.getY(), cell);
+
+        if ((cellLayout.isOccupied(cell[0], cell[1]))) {
+            View v= cellLayout.getChildAt(cell[0], cell[1]);
+            if (v instanceof BubbleTextView) {
+                RectF rect = new RectF();
+                FloatingIconView.getLocationBoundsForView(mLauncher, v, false, rect,
+                        new Rect());
+
+                if (rect.contains(ev.getX(), ev.getY()) && ev.getAction() == MotionEvent.ACTION_MOVE) {
+                    return false;
+                }
+            }
+        }
+
+        return super.onTouchEvent(ev);
+    }
+
 
     protected void onPageBeginTransition() {
         super.onPageBeginTransition();
@@ -1721,6 +1749,9 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         }
 
         View child = cellInfo.cell;
+        if (wobbleExpireAlarm.alarmPending()) {
+            wobbleExpireAlarm.cancelAlarm();
+        }
 
         mDragInfo = cellInfo;
         child.clearAnimation();
@@ -3618,6 +3649,10 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
                 }
 
                 if (!(view instanceof FolderIcon) && view instanceof BubbleTextView) {
+                    view.setOnTouchListener(ItemLongClickListener.INSTANCE_WORKSPACE_WOBBLE);
+                }
+
+                if (!(view instanceof FolderIcon)) {
                     view.setOnTouchListener(ItemLongClickListener.INSTANCE_WORKSPACE_WOBBLE);
                 }
 

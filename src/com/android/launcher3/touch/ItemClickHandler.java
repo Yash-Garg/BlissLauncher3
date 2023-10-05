@@ -93,7 +93,7 @@ public class ItemClickHandler {
         final Workspace workspace = launcher.getWorkspace();
         if (!launcher.getWorkspace().isFinishedSwitchingState()) return;
 
-        if (v instanceof BubbleTextView) {
+        if (v instanceof BubbleTextView && launcher.getWorkspace().isWobbling()) {
             if (((BubbleTextView) v).tryToHandleUninstallClick(launcher)) {
                 return;
             }
