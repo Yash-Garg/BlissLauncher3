@@ -3613,7 +3613,9 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
             AtomicInteger index = new AtomicInteger();
 
             mapOverItems((info, view) -> {
-                view.setLayerType(LAYER_TYPE_HARDWARE, null);
+                if (view instanceof BubbleTextView) {
+                    ((BubbleTextView) view).applyUninstallIconState(true);
+                }
 
                 if (!(view instanceof FolderIcon) && view instanceof BubbleTextView) {
                     view.setOnTouchListener(ItemLongClickListener.INSTANCE_WORKSPACE_WOBBLE);
@@ -3626,6 +3628,7 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
                         return false;
                     }
                 }
+                view.setLayerType(LAYER_TYPE_HARDWARE, null);
                 index.getAndIncrement();
                 if (view instanceof BubbleTextView || view instanceof FolderIcon) {
                     if (index.get() % 2 == 0) {
@@ -3633,9 +3636,6 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
                     } else {
                         view.startAnimation(getReverseWobbleAnimation());
                     }
-                }
-                if (view instanceof BubbleTextView) {
-                    ((BubbleTextView) view).applyUninstallIconState(true);
                 }
                 return false;
             });

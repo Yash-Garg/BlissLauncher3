@@ -35,8 +35,10 @@ import android.view.ViewOutlineProvider;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 
+import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
+import com.android.launcher3.folder.Folder;
 import com.android.launcher3.util.Themes;
 
 /**
@@ -321,6 +323,18 @@ public class PageIndicatorDots extends View implements PageIndicator {
                         mDotRadius
                 );
             }
+        }
+    }
+
+    @Override
+    public void setAlpha(float alpha) {
+        Launcher launcher = Launcher.getLauncher(getContext());
+        if (launcher.getWorkspace().getPageIndicator() == this) {
+            if (Folder.getOpen(launcher) == null) {
+                super.setAlpha(alpha);
+            }
+        } else {
+            super.setAlpha(alpha);
         }
     }
 
