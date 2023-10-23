@@ -19,6 +19,7 @@ import com.android.launcher3.Launcher
 import com.android.launcher3.R
 import com.android.launcher3.pageindicators.PageIndicatorDots
 import com.android.launcher3.util.Themes
+import com.android.quickstep.SysUINavigationMode
 
 class WorkspacePageIndicatorDots
 @JvmOverloads
@@ -41,12 +42,19 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
     override fun setInsets(insets: Rect) {
         val grid: DeviceProfile = mLauncher.deviceProfile
+        val isGestureMode =
+            SysUINavigationMode.getMode(context) == SysUINavigationMode.Mode.NO_BUTTON
 
         val padding = grid.workspacePadding
         updateLayoutParams<MarginLayoutParams> {
             leftMargin = padding.left + grid.workspaceCellPaddingXPx
             rightMargin = padding.right + grid.workspaceCellPaddingXPx
-            bottomMargin = padding.bottom
+            bottomMargin =
+                if (isGestureMode) {
+                    padding.bottom
+                } else {
+                    padding.bottom + grid.hotseatBarTopPaddingPx + grid.workspacePageIndicatorHeight
+                }
         }
     }
 

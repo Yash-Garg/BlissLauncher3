@@ -157,11 +157,11 @@ public class DeviceProfile {
     public int hotseatBarSizeExtraSpacePx;
     public final int numShownHotseatIcons;
     public int hotseatCellHeightPx;
-    private final int hotseatExtraVerticalSize;
+    private int hotseatExtraVerticalSize;
     // In portrait: size = height, in landscape: size = width
     public int hotseatBarSizePx;
     public int hotseatBarTopPaddingPx;
-    public final int hotseatBarBottomPaddingPx;
+    public int hotseatBarBottomPaddingPx;
     // Start is the side next to the nav bar, end is the side next to the workspace
     public final int hotseatBarSidePaddingStartPx;
     public final int hotseatBarSidePaddingEndPx;
@@ -360,6 +360,12 @@ public class DeviceProfile {
         hotseatBarSidePaddingStartPx = isVerticalBarLayout() ? workspacePageIndicatorHeight : 0;
         hotseatExtraVerticalSize =
                 res.getDimensionPixelSize(R.dimen.dynamic_grid_hotseat_extra_vertical_size);
+
+        if (MultiModeController.isSingleLayerMode()) {
+            hotseatBarBottomPaddingPx = 0;
+            hotseatExtraVerticalSize = 0;
+        }
+
         updateHotseatIconSize(
                 pxFromDp(inv.iconSize[InvariantDeviceProfile.INDEX_DEFAULT], mMetrics, 1f));
 
