@@ -70,7 +70,6 @@ public class ReorderAlgorithm {
         int[] result = new int[2];
         result = mCellLayout.findNearestAreaIgnoreOccupied(pixelX, pixelY, spanX, spanY, result);
 
-
         boolean success;
         // First we try the exact nearest position of the item being dragged,
         // we will then want to try to move this around to other neighbouring positions
@@ -200,7 +199,10 @@ public class ReorderAlgorithm {
         mCellLayout.getDirectionVectorForDrop(pixelX, pixelY, spanX, spanY, dragView,
                 mCellLayout.mDirectionVector);
 
-        if (!mCellLayout.isWidget() && !mCellLayout.findCellForSpan(null, minSpanX, minSpanY)) {
+        int[] vacantCell = new int[2];
+        boolean isVacantCellAvailable = mCellLayout.findCellForSpan(vacantCell, minSpanX, minSpanY);
+        if (!mCellLayout.isWidget() && !isVacantCellAvailable &&
+                !mCellLayout.isOccupied(vacantCell[0], vacantCell[1])) {
             CellLayout.ItemConfiguration solution = new CellLayout.ItemConfiguration();
             solution.cellX = solution.cellY = solution.spanX = solution.spanY = -1;
             solution.isSolution =  true;
