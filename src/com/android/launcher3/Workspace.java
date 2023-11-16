@@ -569,6 +569,8 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         if (!wobbleExpireAlarm.alarmPending()) {
             wobbleExpireAlarm.setAlarm(WOBBLE_EXPIRATION_TIMEOUT);
         }
+
+        clearEmptyCell();
     }
 
     /**
@@ -3210,7 +3212,6 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
             cell.setVisibility(VISIBLE);
         }
         mDragInfo = null;
-        clearEmptyCell();
     }
 
     private void clearEmptyCell() {

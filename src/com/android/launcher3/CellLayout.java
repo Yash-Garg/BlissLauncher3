@@ -1440,6 +1440,15 @@ public class CellLayout extends ViewGroup {
         findNearestArea(c.cellX, c.cellY, c.spanX, c.spanY, direction,
                 mTmpOccupied.cells, null, mTempLocation);
 
+        int[] vacantCell = new int[2];
+        mTmpOccupied.findVacantCell(vacantCell, c.spanX, c.spanY);
+        if (vacantCell[0] >= 0 && vacantCell[1] >= 0) {
+            if (!mTmpOccupied.cells[vacantCell[0]][vacantCell[1]]) {
+                mTempLocation[0] = vacantCell[0];
+                mTempLocation[1] = vacantCell[1];
+            }
+        }
+
         if (mTempLocation[0] >= 0 && mTempLocation[1] >= 0) {
             c.cellX = mTempLocation[0];
             c.cellY = mTempLocation[1];
@@ -1965,7 +1974,7 @@ public class CellLayout extends ViewGroup {
         // First we try to find a solution which respects the push mechanic. That is,
         // we try to find a solution such that no displaced item travels through another item
         // without also displacing that item.
-        if (mIntersectingViews.size() == 1  || mIntersectingViews.isEmpty()) {
+        if (mIntersectingViews.size() == 1 || mIntersectingViews.isEmpty()) {
             if (attemptPushInDirection(mIntersectingViews, mOccupiedRect, direction, ignoreView,
                     solution)) {
                 return true;
@@ -1981,12 +1990,15 @@ public class CellLayout extends ViewGroup {
          */
 
         // Ok, they couldn't move as a block, let's move them individually
+        boolean success = false;
         for (View v : mIntersectingViews) {
             if (!addViewToTempLocation(v, mOccupiedRect, direction, solution)) {
                 return false;
+            } else {
+                success = true;
             }
         }
-        return true;
+        return success;
     }
 
     public void reArrangeIcons(int x, int y) {
@@ -2009,9 +2021,9 @@ public class CellLayout extends ViewGroup {
         ArrayList<View> views = new ArrayList<>();
         for (Map.Entry <View, CellAndSpan> keyValue : solution.map.entrySet()) {
             CellAndSpan c = keyValue.getValue();
-            if (c.cellX == intersecting[0] && c.cellY == intersecting[1]) {
+            // if (c.cellX == intersecting[0] && c.cellY == intersecting[1]) {
                 //   views.add(keyValue.getKey());
-            }
+            // }
 
             if (c.cellX == x && c.cellY == y) {
                 Log.e("lulz", "last item name " + ((ItemInfo) keyValue.getKey().getTag()).title);
@@ -2628,8 +2640,10 @@ public class CellLayout extends ViewGroup {
             mPreviousReorderDirection[1] = mDirectionVector[1];
         }
 
-        int[] cell = new int[2];
-        if(!isWidget() && !findCellForSpan(cell, minSpanX, minSpanY)){
+        int[] vacantCell = new int[2];
+        boolean isVacantCellAvailable = findCellForSpan(vacantCell, minSpanX, minSpanY);
+        if (!isWidget() && !isVacantCellAvailable &&
+                !isOccupied(vacantCell[0], vacantCell[1])) {
             result[0] = result[1] = resultSpan[0] = resultSpan[1] = -1;
             return result;
         }
