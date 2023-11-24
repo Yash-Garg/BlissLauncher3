@@ -3215,6 +3215,9 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
     }
 
     private void clearEmptyCell() {
+        // Let Hotseat readjust as well
+        needCellCleanup(getHotseat());
+
         int numberOfScreens = mScreenOrder.size();
         Log.e("lulz", "numberOfScreens " + numberOfScreens );
         for (int i = 1; i < numberOfScreens; i++) {
