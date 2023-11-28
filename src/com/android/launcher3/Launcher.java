@@ -657,7 +657,10 @@ public class Launcher extends StatefulActivity<LauncherState>
             return getWorkspace();
         }
 
-        // #5 state handler
+        // #5 Close widget resize mode
+        hideWidgetResizeContainer();
+
+        // #6 state handler
         return new OnBackPressedHandler() {
             @Override
             public void onBackInvoked() {
@@ -1348,6 +1351,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         }
         mAppWidgetHolder.setActivityResumed(false);
         mAppMonitor.onLauncherPaused();
+        hideWidgetResizeContainer();
     }
 
     /**
