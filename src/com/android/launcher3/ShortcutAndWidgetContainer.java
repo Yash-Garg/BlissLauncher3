@@ -39,6 +39,8 @@ import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.widget.NavigableAppWidgetHostView;
 
+import foundation.e.bliss.folder.GridFolder;
+
 public class ShortcutAndWidgetContainer extends ViewGroup implements FolderIcon.FolderIconParent {
     static final String TAG = "ShortcutAndWidgetContainer";
 
@@ -270,8 +272,11 @@ public class ShortcutAndWidgetContainer extends ViewGroup implements FolderIcon.
     @Override
     public void drawFolderLeaveBehindForIcon(FolderIcon child) {
         CellLayoutLayoutParams lp = (CellLayoutLayoutParams) child.getLayoutParams();
-        // While the folder is open, the position of the icon cannot change.
-        lp.canReorder = false;
+        if (!(child.getFolder() instanceof GridFolder)) {
+            // While the folder is open, the position of the icon cannot change.
+            // With Grid folder and auto reorder it is necessary we change position
+            lp.canReorder = false;
+        }
         if (mContainerType == HOTSEAT) {
             CellLayout cl = (CellLayout) getParent();
             cl.setFolderLeaveBehindCell(lp.getCellX(), lp.getCellY());
