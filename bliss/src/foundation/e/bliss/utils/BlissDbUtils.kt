@@ -23,7 +23,6 @@ import com.android.launcher3.LauncherSettings.Favorites.PROFILE_ID
 import com.android.launcher3.LauncherSettings.Favorites.TABLE_NAME
 import com.android.launcher3.LauncherSettings.Favorites.TABLE_NAME_ALL
 import com.android.launcher3.shortcuts.ShortcutKey
-import foundation.e.bliss.widgets.DefaultWidgets
 import java.net.URISyntaxException
 
 object BlissDbUtils {
@@ -259,11 +258,6 @@ object BlissDbUtils {
 
                         if (widgetInfo != null) {
                             var provider: ComponentName = widgetInfo.provider
-
-                            // Weather app component name has changed.
-                            if (provider == DefaultWidgets.oldWeatherWidget) {
-                                provider = DefaultWidgets.weatherWidget
-                            }
 
                             widgetsInfoList.add(
                                 WidgetItems(
