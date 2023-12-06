@@ -1235,6 +1235,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         }
         mAppWidgetHost.setActivityResumed(false);
         mAppMonitor.onLauncherPaused();
+        hideWidgetResizeContainer();
     }
 
     /**
@@ -2077,6 +2078,8 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             getWorkspace().wobbleLayouts(false);
             return;
         }
+
+        hideWidgetResizeContainer();
 
         // Note: There should be at most one log per method call. This is enforced implicitly
         // by using if-else statements.
