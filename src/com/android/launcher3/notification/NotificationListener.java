@@ -48,6 +48,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import foundation.e.blisslauncher.features.notification.NotificationService;
+
 /**
  * A {@link NotificationListenerService} that sends updates to its
  * {@link NotificationsChangedListener} when notifications are posted or canceled,
@@ -91,7 +93,11 @@ public class NotificationListener extends NotificationListenerService {
     }
 
     public static @Nullable NotificationListener getInstanceIfConnected() {
-        return sIsConnected ? sNotificationListenerInstance : null;
+         NotificationListener notificationListener = NotificationService.getInstanceIfConnected();
+         if (notificationListener == null) {
+             notificationListener = sNotificationListenerInstance;
+         }
+         return notificationListener;
     }
 
     public static void setNotificationsChangedListener(NotificationsChangedListener listener) {
