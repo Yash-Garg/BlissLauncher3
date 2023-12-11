@@ -65,7 +65,6 @@ import androidx.annotation.UiThread;
 
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
 import com.android.launcher3.dot.DotInfo;
-import com.android.launcher3.dragndrop.DragController;
 import com.android.launcher3.dragndrop.DragOptions;
 import com.android.launcher3.dragndrop.DraggableView;
 import com.android.launcher3.folder.FolderIcon;
@@ -104,7 +103,7 @@ import foundation.e.bliss.wobble.UninstallButtonRenderer;
  * too aggressive.
  */
 public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
-        IconLabelDotView, DraggableView, Reorderable, DragController.DragListener {
+        IconLabelDotView, DraggableView, Reorderable {
 
     private static final int DISPLAY_WORKSPACE = 0;
     private static final int DISPLAY_ALL_APPS = 1;
@@ -1166,7 +1165,9 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         resetIconScale();
         setForceHideDot(true);
         applyUninstallIconState(false);
-        return () -> { };
+        return () -> {
+            setForceHideDot(false);
+        };
     }
 
     private void resetIconScale() {
@@ -1191,14 +1192,5 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         args.put("app_name", appName);
         args.put("count", notificationCount);
         return icuCountFormat.format(args);
-    }
-
-    @Override
-    public void onDragStart(DropTarget.DragObject dragObject, DragOptions options) {
-    }
-
-    @Override
-    public void onDragEnd() {
-        setForceHideDot(false);
     }
 }
