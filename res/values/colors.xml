@@ -88,5 +88,5 @@
     <color name="preload_icon_background_color_dark">#40484D</color>
 
     <color name="work_turn_on_stroke">?android:attr/colorAccent</color>
-    <color name="notification_dot_bg">#44B04C</color>
+    <color name="notification_dot_bg">#01D066</color>
 </resources>
