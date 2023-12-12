@@ -292,6 +292,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     public void reset() {
         mDotInfo = null;
         mDotParams.color = Color.TRANSPARENT;
+        mDotParams.shadowDotColor = Color.TRANSPARENT;
         cancelDotScaleAnim();
         mDotParams.scale = 0f;
         mForceHideDot = false;
@@ -411,7 +412,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                 || mDisplay == DISPLAY_TASKBAR;
         FastBitmapDrawable iconDrawable = info.newIcon(getContext(), useTheme && !MultiModeController.isSingleLayerMode());
         mDotParams.color = getContext().getColor(R.color.notification_dot_bg);
-
+        mDotParams.shadowDotColor = getContext().getColor(R.color.notification_dot_shadow);
         setIcon(iconDrawable);
         applyLabel(info);
     }

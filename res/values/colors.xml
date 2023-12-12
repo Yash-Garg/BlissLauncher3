@@ -79,5 +79,5 @@
 
     <color name="workspace_accent_color_light">#ff8df5e3</color>
     <color name="workspace_accent_color_dark">#ff3d665f</color>
-    <color name="notification_dot_bg">#44B04C</color>
+    <color name="notification_dot_bg">#01D066</color>
 </resources>
