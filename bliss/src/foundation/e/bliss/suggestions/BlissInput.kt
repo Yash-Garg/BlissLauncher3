@@ -175,15 +175,16 @@ class BlissInput(context: Context, attrs: AttributeSet) :
     private fun createAppView(info: ItemInfoWithIcon): BubbleTextView {
         val width =
             idp.getDeviceProfile(context).availableWidthPx -
-                ResourceUtils.pxFromDp(32f, context.resources.displayMetrics)
-        val padding = ((width / idp.numColumns) - (idp.iconBitmapSize * 1.3)) / 2
+                ResourceUtils.pxFromDp(47.5f, context.resources.displayMetrics)
+        val perAppWidth = width / idp.numColumns
+        val padding = (perAppWidth - (idp.iconBitmapSize * 1.3)) / 2
         return (LayoutInflater.from(context).inflate(R.layout.app_icon, null) as BubbleTextView)
             .apply {
                 tag = info
                 applyFromApplicationInfo(info as AppInfo)
                 setForceHideDot(true)
                 setTextColor(Color.WHITE)
-                setWidth(width / idp.numColumns)
+                setWidth(perAppWidth)
                 setPaddingRelative(padding.toInt(), 0, padding.toInt(), 0)
                 setOnClickListener(appMonitor.launcher.itemOnClickListener)
             }
