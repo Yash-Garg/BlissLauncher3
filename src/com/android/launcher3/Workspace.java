@@ -414,7 +414,11 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     private void updateCellLayoutPadding() {
         Rect padding = mLauncher.getDeviceProfile().cellLayoutPaddingPx;
         mWorkspaceScreens.forEach(
-                s -> s.setPadding(padding.left, padding.top, padding.right, padding.bottom));
+                s -> {
+                    int paddingTop = (s == mWorkspaceScreens.get(FIRST_SCREEN_ID))? 0 : padding.top;
+                    int paddingBottom = (s == mWorkspaceScreens.get(FIRST_SCREEN_ID))? 0 : padding.bottom;
+                    s.setPadding(padding.left, paddingTop, padding.right, paddingBottom);
+                });
     }
 
     private void updateWorkspaceWidgetsSizes() {
@@ -659,11 +663,17 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                     .inflate(R.layout.search_container_workspace_v2, firstPage, false);
         }
 
-        int cellHSpan = mLauncher.getDeviceProfile().inv.numColumns;
-        int cellVSpan = mLauncher.getDeviceProfile().inv.numRows;
-        CellLayoutLayoutParams lp = new CellLayoutLayoutParams(0, 0, cellHSpan, cellVSpan);
+        int spanX = firstPage.getCountX();
+        int spanY = firstPage.getCountY();
+        CellLayoutLayoutParams lp = new CellLayoutLayoutParams(0, 0, spanX, spanY);
 
         lp.canReorder = false;
+        lp.isFullscreen = true;
+
+        if (mFirstPagePinnedItem instanceof Insettable) {
+            ((Insettable)mFirstPagePinnedItem).setInsets(mInsets);
+        }
+
         if (!firstPage.addViewToCellLayout(
                 mFirstPagePinnedItem, 0, R.id.search_container_workspace, lp, true)) {
             Log.e(TAG, "Failed to add to item at (0, 0) to CellLayout");
@@ -733,6 +743,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         mWorkspaceScreens.put(screenId, newScreen);
         mScreenOrder.add(insertIndex, screenId);
         if (screenId == FIRST_SCREEN_ID && FeatureFlags.QSB_ON_FIRST_SCREEN.get()) {
+            newScreen.disableJailContent();
+            newScreen.disableDragTarget();
+            newScreen.setPadding(0, 0, 0, 0);
+
             addFullScreenPage(newScreen, insertIndex);
         } else {
             addView(newScreen, insertIndex);
@@ -1319,11 +1333,12 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     }
 
     private void firstPageItemHideHotseat(int scrollX) {
-        DeviceProfile grid = mLauncher.getDeviceProfile();
-        int bottomPadding = grid.workspacePadding.bottom;
-
         final DeviceProfile dp = mLauncher.getDeviceProfile();
+
         float progress = (float) scrollX / dp.availableWidthPx;
+
+        if (progress > 1)
+            return;
 
         if (progress >= 0.999)
             progress = 1;
@@ -1331,16 +1346,23 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             progress = 0;
 
         int dockHeight = getHotseat().getHeight() + getPageIndicator().getHeight();
+        int bottomPadding = dp.workspacePadding.bottom;
         float dockTranslationY = (1 - progress) * dockHeight;
 
         float qsbPadding = progress * bottomPadding;
+        CellLayout firstScreen = mWorkspaceScreens.get(FIRST_SCREEN_ID);
+
+        if (progress == 0 && firstScreen.getPaddingBottom() != 0) {
+            qsbPadding = 0;
+        }
 
         getHotseat().setForcedTranslationY(dockTranslationY);
         ((PageIndicatorDots) getPageIndicator()).setForcedTranslationY(dockTranslationY);
-        CellLayout firstScreen = mWorkspaceScreens.get(FIRST_SCREEN_ID);
         firstScreen.setPadding(
-                firstScreen.getPaddingLeft(), firstScreen.getPaddingTop(), firstScreen.getPaddingRight(),
-                progress != 0 ? (int) qsbPadding : firstScreen.getPaddingBottom());
+                firstScreen.getPaddingLeft(),
+                firstScreen.getPaddingTop(),
+                firstScreen.getPaddingRight(),
+                (int) qsbPadding);
 
         if (getCurrentPage() != 0) {
             mLauncher.mBlurLayer.setAlpha(0f);

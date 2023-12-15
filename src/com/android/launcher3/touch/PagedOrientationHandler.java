@@ -33,6 +33,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.PagedView;
 import com.android.launcher3.util.SplitConfigurationOptions;
 import com.android.launcher3.util.SplitConfigurationOptions.SplitBounds;
 import com.android.launcher3.util.SplitConfigurationOptions.SplitPositionOption;
@@ -87,7 +88,8 @@ public interface PagedOrientationHandler {
     int getSecondaryTranslationDirectionFactor();
     int getSplitTranslationDirectionFactor(@StagePosition int stagePosition,
             DeviceProfile deviceProfile);
-    ChildBounds getChildBounds(View child, int childStart, int pageCenter, boolean layoutChild);
+    ChildBounds getChildBounds(View child, int childStart, int pageCenter, boolean layoutChild,
+                               PagedView.LayoutParams layoutParams, int offsetY);
     void setMaxScroll(AccessibilityEvent event, int maxScroll);
     boolean getRecentsRtlSetting(Resources resources);
     float getDegreesRotated();
