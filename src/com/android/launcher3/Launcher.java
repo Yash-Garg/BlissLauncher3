@@ -586,6 +586,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         if (Utilities.ATLEAST_R) {
             getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
         }
+        getWindow().setNavigationBarColor(getWindow().getNavigationBarColor() | 0x26000000);
     }
 
     protected LauncherOverlayManager getDefaultOverlay() {

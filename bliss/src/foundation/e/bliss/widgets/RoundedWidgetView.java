@@ -40,7 +40,7 @@ public class RoundedWidgetView extends LauncherAppWidgetHostView {
         this.mContext = context;
         this.cornerRadius = context.getResources().getDimensionPixelSize(R.dimen.default_dialog_corner_radius);
         if (blurBackground) {
-            mBlurDelegate = new BlurViewDelegate(this, BlurWallpaperProvider.Companion.getBlurConfigWidget(), null);
+            mBlurDelegate = new BlurViewDelegate(this, BlurWallpaperProvider.blurConfigWidget, null);
             mBlurDelegate.setBlurCornerRadius(cornerRadius);
             setWillNotDraw(false);
             setOutlineProvider(mBlurDelegate.getOutlineProvider());
