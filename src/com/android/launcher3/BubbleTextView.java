@@ -280,7 +280,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             mShouldShowLabel = prefs.getBoolean(KEY_SHOW_DESKTOP_LABELS, true);
         }
 
-        mCenterVertically = a.getBoolean(R.styleable.BubbleTextView_centerVertically, false);
+        mCenterVertically = a.getBoolean(R.styleable.BubbleTextView_centerVertically, MultiModeController.isSingleLayerMode());
 
         mIconSize = a.getDimensionPixelSize(R.styleable.BubbleTextView_iconSizeOverride,
                 defaultIconSize);
