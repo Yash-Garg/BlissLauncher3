@@ -47,6 +47,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.PagedView;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.util.SplitConfigurationOptions;
@@ -396,11 +397,16 @@ public class PortraitPagedViewHandler implements PagedOrientationHandler {
 
     @Override
     public ChildBounds getChildBounds(View child, int childStart, int pageCenter,
-        boolean layoutChild) {
+                                      boolean layoutChild, PagedView.LayoutParams lp, int offsetY) {
         final int childWidth = child.getMeasuredWidth();
         final int childRight = childStart + childWidth;
         final int childHeight = child.getMeasuredHeight();
-        final int childTop = pageCenter - childHeight / 2;
+        final int childTop;
+        if (lp != null && lp.isFullScreenPage) {
+            childTop = offsetY;
+        } else {
+            childTop = pageCenter - childHeight / 2;
+        }
         if (layoutChild) {
             child.layout(childStart, childTop, childRight, childTop + childHeight);
         }

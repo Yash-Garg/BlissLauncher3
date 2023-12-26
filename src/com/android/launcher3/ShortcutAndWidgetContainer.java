@@ -132,29 +132,36 @@ public class ShortcutAndWidgetContainer extends ViewGroup implements FolderIcon.
         CellLayout.LayoutParams lp = (CellLayout.LayoutParams) child.getLayoutParams();
         final DeviceProfile dp = mActivity.getDeviceProfile();
 
-        if (child instanceof NavigableAppWidgetHostView) {
-            ((NavigableAppWidgetHostView) child).getWidgetInset(dp, mTempRect);
-            lp.setup(mCellWidth, mCellHeight, invertLayoutHorizontally(), mCountX, mCountY,
-                    dp.appWidgetScale.x, dp.appWidgetScale.y, mBorderSpace, mTempRect);
-        } else {
-            lp.setup(mCellWidth, mCellHeight, invertLayoutHorizontally(), mCountX, mCountY,
-                    mBorderSpace, null);
-            // Center the icon/folder
-            int cHeight = getCellContentHeight();
-            int cellPaddingY = dp.isScalableGrid && mContainerType == WORKSPACE
-                    ? dp.cellYPaddingPx
-                    : (int) Math.max(0, ((lp.height - cHeight) / 2f));
+        if (!lp.isFullscreen) {
+            if (child instanceof NavigableAppWidgetHostView) {
+                ((NavigableAppWidgetHostView) child).getWidgetInset(dp, mTempRect);
+                lp.setup(mCellWidth, mCellHeight, invertLayoutHorizontally(), mCountX, mCountY,
+                        dp.appWidgetScale.x, dp.appWidgetScale.y, mBorderSpace, mTempRect);
+            } else {
+                lp.setup(mCellWidth, mCellHeight, invertLayoutHorizontally(), mCountX, mCountY,
+                        mBorderSpace, null);
+                // Center the icon/folder
+                int cHeight = getCellContentHeight();
+                int cellPaddingY = dp.isScalableGrid && mContainerType == WORKSPACE
+                        ? dp.cellYPaddingPx
+                        : (int) Math.max(0, ((lp.height - cHeight) / 2f));
 
-            // No need to add padding when cell layout border spacing is present.
-            boolean noPaddingX =
-                    (dp.cellLayoutBorderSpacePx.x > 0 && mContainerType == WORKSPACE)
-                            || (dp.folderCellLayoutBorderSpacePx.x > 0 && mContainerType == FOLDER);
-            int cellPaddingX = noPaddingX
-                    ? 0
-                    : mContainerType == WORKSPACE
-                            ? dp.workspaceCellPaddingXPx
-                            : (int) (dp.edgeMarginPx / 2f);
-            child.setPadding(cellPaddingX, cellPaddingY, cellPaddingX, 0);
+                // No need to add padding when cell layout border spacing is present.
+                boolean noPaddingX =
+                        (dp.cellLayoutBorderSpacePx.x > 0 && mContainerType == WORKSPACE)
+                                || (dp.folderCellLayoutBorderSpacePx.x > 0 && mContainerType == FOLDER);
+                int cellPaddingX = noPaddingX
+                        ? 0
+                        : mContainerType == WORKSPACE
+                        ? dp.workspaceCellPaddingXPx
+                        : (int) (dp.edgeMarginPx / 2f);
+                child.setPadding(cellPaddingX, cellPaddingY, cellPaddingX, 0);
+            }
+        } else {
+            lp.x = 0;
+            lp.y = 0;
+            lp.width = getMeasuredWidth();
+            lp.height = getMeasuredHeight();
         }
         int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(lp.width, MeasureSpec.EXACTLY);
         int childheightMeasureSpec = MeasureSpec.makeMeasureSpec(lp.height, MeasureSpec.EXACTLY);

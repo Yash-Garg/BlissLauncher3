@@ -104,6 +104,8 @@ public class CellLayout extends ViewGroup {
     private int mCountY;
 
     private boolean mDropPending = false;
+    private boolean mIsDragTarget = true;
+    private boolean mJailContent = true;
 
     // These are temporary variables to prevent having to allocate a new object just to
     // return an (x, y) value from helper functions. Do NOT use them to maintain other state.
@@ -410,16 +412,32 @@ public class CellLayout extends ViewGroup {
         }
     }
 
+    void disableDragTarget() {
+        mIsDragTarget = false;
+    }
+
+    public boolean isDragTarget() {
+        return mIsDragTarget;
+    }
+
+    public void disableJailContent() {
+        mJailContent = false;
+    }
+
     @Override
     protected void dispatchSaveInstanceState(SparseArray<Parcelable> container) {
-        ParcelableSparseArray jail = getJailedArray(container);
-        super.dispatchSaveInstanceState(jail);
-        container.put(R.id.cell_layout_jail_id, jail);
+        if (mJailContent) {
+            ParcelableSparseArray jail = getJailedArray(container);
+            super.dispatchSaveInstanceState(jail);
+            container.put(R.id.cell_layout_jail_id, jail);
+        } else {
+            super.dispatchSaveInstanceState(container);
+        }
     }
 
     @Override
     protected void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
-        super.dispatchRestoreInstanceState(getJailedArray(container));
+        super.dispatchRestoreInstanceState(mJailContent ? getJailedArray(container) : container);
     }
 
     /**
@@ -438,6 +456,10 @@ public class CellLayout extends ViewGroup {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if (!mIsDragTarget) {
+            return;
+        }
+
         // When we're large, we are either drawn in a "hover" state (ie when dragging an item to
         // a neighboring page) or with just a normal background (if backgroundAlpha > 0.0f)
         // When we're small, we are either drawn normally or in the "accepts drops" state (during
@@ -1022,7 +1044,7 @@ public class CellLayout extends ViewGroup {
 
     @Override
     protected boolean verifyDrawable(Drawable who) {
-        return super.verifyDrawable(who) || (who == mBackground);
+        return super.verifyDrawable(who) || (mIsDragTarget && who == mBackground);
     }
 
     public ShortcutAndWidgetContainer getShortcutsAndWidgets() {
@@ -3108,6 +3130,8 @@ public class CellLayout extends ViewGroup {
         public int y;
 
         boolean dropped;
+
+        public boolean isFullscreen = false;
 
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);

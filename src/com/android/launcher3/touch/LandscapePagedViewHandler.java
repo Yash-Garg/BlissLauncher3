@@ -46,6 +46,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.PagedView;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.util.SplitConfigurationOptions;
@@ -376,7 +377,7 @@ public class LandscapePagedViewHandler implements PagedOrientationHandler {
 
     @Override
     public ChildBounds getChildBounds(View child, int childStart, int pageCenter,
-        boolean layoutChild) {
+                                      boolean layoutChild, PagedView.LayoutParams lp, int offsetY) {
         final int childHeight = child.getMeasuredHeight();
         final int childBottom = childStart + childHeight;
         final int childWidth = child.getMeasuredWidth();
