@@ -133,7 +133,7 @@ public class Hotseat extends CellLayout implements Insettable, OffsetParent {
         }
 
         Rect padding = grid.getHotseatLayoutPadding(getContext());
-        setPadding(padding.left, padding.top, padding.right, padding.bottom);
+        setPadding(padding.left, padding.top * 2, padding.right, padding.bottom);
         setLayoutParams(lp);
         InsettableFrameLayout.dispatchInsets(this, insets);
     }
