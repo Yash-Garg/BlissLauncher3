@@ -20,7 +20,6 @@ import android.os.Bundle
 import android.os.ServiceManager
 import android.os.UserHandle
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -166,7 +165,6 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
             object : LauncherAppMonitorCallback {
                 override fun onPackageRemoved(packageName: String?, user: UserHandle?) {
                     rebindWidgets()
-                    Log.e("lulz", "package removed")
                 }
             }
 

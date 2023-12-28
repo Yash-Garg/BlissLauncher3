@@ -3238,7 +3238,6 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         needCellCleanup(getHotseat());
 
         int numberOfScreens = mScreenOrder.size();
-        Log.e("lulz", "numberOfScreens " + numberOfScreens );
         for (int i = 1; i < numberOfScreens; i++) {
             CellLayout cellLayout = mWorkspaceScreens.get(mScreenOrder.get(i));
             needCellCleanup(cellLayout);

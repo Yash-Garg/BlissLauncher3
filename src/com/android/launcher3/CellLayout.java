@@ -2024,7 +2024,6 @@ public class CellLayout extends ViewGroup {
     }
 
     public void reArrangeIcons(int x, int y) {
-        Log.e("lulz", "lastOccupied x: " + x + " y:" + y);
         ItemConfiguration solution = new ItemConfiguration();
         copyCurrentStateToSolution(solution, false);
         View dragView = null;
@@ -2038,7 +2037,6 @@ public class CellLayout extends ViewGroup {
             intersecting[0] = x - 1;
             intersecting[1] = y;
         }
-        Log.e("lulz", "intersecting x: " + intersecting[0] + " y:" + intersecting[1]);
 
         ArrayList<View> views = new ArrayList<>();
         for (Map.Entry <View, CellAndSpan> keyValue : solution.map.entrySet()) {
@@ -2048,7 +2046,6 @@ public class CellLayout extends ViewGroup {
             // }
 
             if (c.cellX == x && c.cellY == y) {
-                Log.e("lulz", "last item name " + ((ItemInfo) keyValue.getKey().getTag()).title);
                 mTmpOccupied.markCells(c, false);
                 dragView = keyValue.getKey();
                 views.add(dragView);
