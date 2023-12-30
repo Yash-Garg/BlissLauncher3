@@ -1,2 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="maps">Landakort</string>
+    <string name="suggestions">TILLÖGUR</string>
+    <string name="edit">Breyta</string>
+    <string name="min">Lágm</string>
+    <string name="uninstall_app">Viltu taka út þetta forrit?</string>
+    <string name="widget_add">Bæta við</string>
+    <string name="ok">Í lagi</string>
+    <string name="widget_remove">Fjarlægja</string>
+    <string name="cancel">Hætta við</string>
+    <string name="search">Leita</string>
+    <string name="max">Hám</string>
+    <string name="untitled_folder">Ónefnt</string>
+    <string name="widget_no_resize">Get ekki breytt stærð þessa viðmótshluta</string>
+</resources>
