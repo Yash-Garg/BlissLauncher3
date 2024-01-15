@@ -27,6 +27,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -631,6 +632,19 @@ public class FolderIcon extends FrameLayout implements FolderListener, IconLabel
         }
 
         drawDot(canvas);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if (MultiModeController.isSingleLayerMode()) {
+            Paint.FontMetrics fm = mFolderName.getPaint().getFontMetrics();
+            int cellHeightPx = mFolderName.getIconSize() + mFolderName.getCompoundDrawablePadding() +
+                    (int) Math.ceil(fm.bottom - fm.top);
+            int height = MeasureSpec.getSize(heightMeasureSpec);
+            setPadding(getPaddingLeft(), (height - cellHeightPx) / 2, getPaddingRight(),
+                    getPaddingBottom());
+        }
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
     public void drawDot(Canvas canvas) {
