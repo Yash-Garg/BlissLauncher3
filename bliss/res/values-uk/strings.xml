@@ -1,2 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="maps">Карти</string>
+    <string name="suggestions">ПОРАДИ</string>
+    <string name="edit">Редагувати</string>
+    <string name="min">Мін.</string>
+    <string name="uninstall_app">Ви хочете видалити цей застосунок?</string>
+    <string name="widget_add">Додати</string>
+    <string name="ok">ОК</string>
+    <string name="widget_remove">Видалити</string>
+    <string name="cancel">Скасувати</string>
+    <string name="search">Пошук</string>
+    <string name="max">Макс.</string>
+    <string name="untitled_folder">Без назви</string>
+    <string name="widget_no_resize">Не вдається змінити розмір цього віджету</string>
+</resources>
