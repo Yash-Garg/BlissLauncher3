@@ -1450,7 +1450,7 @@ public class DeviceProfile {
             return hotseatBarBottomSpacePx - (Math.abs(hotseatCellHeightPx - iconSizePx) / 2);
         } else {
             int size = hotseatBarSizePx - hotseatCellHeightPx;
-            return isFullyGesture ? size / 4 : size;
+            return isFullyGesture ? size / 4 : Math.round(size / 1.5f);
         }
     }
 
