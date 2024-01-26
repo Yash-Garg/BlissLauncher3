@@ -36,7 +36,6 @@ import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.Launcher
 import com.android.launcher3.PendingAddItemInfo
 import com.android.launcher3.R
-import com.android.launcher3.ResourceUtils
 import com.android.launcher3.Utilities
 import com.android.launcher3.config.FeatureFlags
 import com.android.launcher3.graphics.FragmentWithPreview
@@ -312,12 +311,9 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
                     }
                     .also {
                         val opts = mWidgetManager.getAppWidgetOptions(it.appWidgetId)
-                        val maxWidth =
-                            launcher.deviceProfile.availableWidthPx -
-                                2 * ResourceUtils.pxFromDp(8f, launcher.resources.displayMetrics)
                         val params =
                             LayoutParams(
-                                maxWidth,
+                                -1,
                                 opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
                             )
 
