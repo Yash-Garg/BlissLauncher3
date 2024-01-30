@@ -435,6 +435,8 @@ public class DeviceProfile {
             workspaceBottomPadding = Math.round(paddingWorkspaceBottom * cellScaleToFit);
             extraHotseatBottomPadding = Math.round(paddingHotseatBottom * cellScaleToFit);
 
+            hotseatBarSizePx += extraHotseatBottomPadding;
+
             qsbBottomMarginPx = Math.round(qsbBottomMarginOriginalPx * cellScaleToFit);
         } else if (!isVerticalBarLayout() && isPhone && isTallDevice) {
             // We increase the hotseat size when there is extra space.
@@ -940,14 +942,15 @@ public class DeviceProfile {
             float workspaceCellWidth = (float) widthPx / inv.numColumns;
             float hotseatCellWidth = (float) widthPx / numShownHotseatIcons;
             int hotseatAdjustment = Math.round((workspaceCellWidth - hotseatCellWidth) / 2);
+            int verticalPadding = hotseatBarSizePx - hotseatCellHeightPx - hotseatBarTopPaddingPx;
             mHotseatPadding.set(
                     hotseatAdjustment + workspacePadding.left + cellLayoutPaddingLeftRightPx
                             + mInsets.left,
-                    hotseatBarTopPaddingPx,
+                    verticalPadding,
                     hotseatAdjustment + workspacePadding.right + cellLayoutPaddingLeftRightPx
                             + mInsets.right,
-                    hotseatBarSizePx - hotseatCellHeightPx - hotseatBarTopPaddingPx
-                            + cellLayoutBottomPaddingPx + mInsets.bottom);
+                    verticalPadding
+            );
         }
         return mHotseatPadding;
     }
