@@ -2026,9 +2026,9 @@ public class CellLayout extends ViewGroup {
     public void reArrangeIcons(int x, int y) {
         ItemConfiguration solution = new ItemConfiguration();
         copyCurrentStateToSolution(solution, false);
-        View dragView = null;
         int[] intersecting = new int[2];
         Launcher launcher = Launcher.cast(mActivity);
+        ArrayList<View> views = new ArrayList<>();
 
         if (x == 0) {
             intersecting[0] = mCountX - 1;
@@ -2038,36 +2038,18 @@ public class CellLayout extends ViewGroup {
             intersecting[1] = y;
         }
 
-        ArrayList<View> views = new ArrayList<>();
         for (Map.Entry <View, CellAndSpan> keyValue : solution.map.entrySet()) {
             CellAndSpan c = keyValue.getValue();
-            // if (c.cellX == intersecting[0] && c.cellY == intersecting[1]) {
-                //   views.add(keyValue.getKey());
-            // }
 
             if (c.cellX == x && c.cellY == y) {
                 mTmpOccupied.markCells(c, false);
-                dragView = keyValue.getKey();
-                views.add(dragView);
-                pushIconByRow(c, mCountX, mCountY, ViewCluster.LEFT);
-
-                int screenId = launcher.getWorkspace().getIdForScreen(this);
-                int container = Favorites.CONTAINER_DESKTOP;
-
-                LayoutParams lp = (LayoutParams) dragView.getLayoutParams();
-                ItemInfo info = (ItemInfo) dragView.getTag();
-                info.cellX = lp.cellX = intersecting[0];
-                info.cellY = lp.cellY = intersecting[1];
-                info.spanX = lp.cellHSpan = 1;
-                info.spanY = lp.cellVSpan = 1;
-                lp.isLockedToGrid = true;
-
-                launcher.getModelWriter().modifyItemInDatabase(info, container,
-                        screenId, info.cellX, info.cellY, info.spanX, info.spanY);
+                views.add(keyValue.getKey());
             }
         }
+
         ViewCluster cluster = new ViewCluster(views, solution);
         cluster.sortConfigurationForEdgePush(ViewCluster.LEFT);
+
         solution.sortedViews.sort((lhs, rhs) -> {
             LayoutParams lplhs = (LayoutParams) lhs.getLayoutParams();
             LayoutParams lprhs = (LayoutParams) rhs.getLayoutParams();
@@ -2100,8 +2082,8 @@ public class CellLayout extends ViewGroup {
         solution.spanY = 1;
         solution.isSolution = true;
 
-        if (dragView != null) {
-            performReorder(solution, dragView, MODE_ON_DROP);
+        if (views.get(0) != null) {
+            performReorder(solution, views.get(0), MODE_ON_DROP);
         }
     }
 
@@ -2235,7 +2217,7 @@ public class CellLayout extends ViewGroup {
         int childCount = mShortcutsAndWidgets.getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = mShortcutsAndWidgets.getChildAt(i);
-            if (child == dragView) continue;
+            // if (child == dragView) continue;
             CellAndSpan c = solution.map.get(child);
             if (c != null) {
                 animateChildToPosition(child, c.cellX, c.cellY, REORDER_ANIMATION_DURATION, 0,
