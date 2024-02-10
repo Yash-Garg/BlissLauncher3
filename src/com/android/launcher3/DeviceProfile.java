@@ -44,6 +44,7 @@ import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.DisplayController.Info;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.util.WindowBounds;
+import com.android.quickstep.SysUINavigationMode;
 
 import foundation.e.bliss.multimode.MultiModeController;
 import lineageos.providers.LineageSettings;
@@ -943,13 +944,22 @@ public class DeviceProfile {
             float hotseatCellWidth = (float) widthPx / numShownHotseatIcons;
             int hotseatAdjustment = Math.round((workspaceCellWidth - hotseatCellWidth) / 2);
             int verticalPadding = hotseatBarSizePx - hotseatCellHeightPx - hotseatBarTopPaddingPx;
+            SysUINavigationMode.Mode mode = SysUINavigationMode.getMode(context);
+
+            int bottomPadding;
+            if (mode == SysUINavigationMode.Mode.NO_BUTTON) {
+                bottomPadding = verticalPadding;
+            } else {
+                bottomPadding = verticalPadding + Math.round(mInsets.bottom / 1.5f);
+            }
+
             mHotseatPadding.set(
                     hotseatAdjustment + workspacePadding.left + cellLayoutPaddingLeftRightPx
                             + mInsets.left,
                     verticalPadding,
                     hotseatAdjustment + workspacePadding.right + cellLayoutPaddingLeftRightPx
                             + mInsets.right,
-                    verticalPadding
+                    bottomPadding
             );
         }
         return mHotseatPadding;
