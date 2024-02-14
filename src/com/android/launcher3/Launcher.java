@@ -564,8 +564,11 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             mLauncherCallbacks.onCreate(savedInstanceState);
         }
 
-        requestPermissions(new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE},
-                STORAGE_PERMISSION_REQUEST_CODE);
+        if (checkSelfPermission(Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE},
+                    STORAGE_PERMISSION_REQUEST_CODE);
+        }
 
         mOverlayManager = getDefaultOverlay();
         PluginManagerWrapper.INSTANCE.get(this).addPluginListener(this,
