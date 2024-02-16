@@ -1309,10 +1309,6 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
                 firstScreen.getPaddingRight(),
                 (int) qsbPadding);
 
-        if (getCurrentPage() != 0) {
-            mLauncher.mBlurLayer.setAlpha(0f);
-        }
-
         if (scrollX >= 0 && scrollX < dp.availableWidthPx) {
             float fraction = (float) (dp.availableWidthPx - scrollX)
                     / dp.availableWidthPx;
