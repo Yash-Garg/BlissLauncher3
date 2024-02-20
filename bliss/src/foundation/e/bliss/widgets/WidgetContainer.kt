@@ -224,6 +224,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
                             Logger.e(TAG, "Could not add widget ${it.flattenToString()}")
                         }
                     }
+                    rebindWidgets()
                 } else {
                     rebindWidgets(true)
                 }
@@ -272,6 +273,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
             if (!isWidgetBound) {
                 mWidgetHost.deleteAppWidgetId(widgetId)
                 Logger.e(TAG, "Could not add widget ${provider.flattenToString()}")
+                return
             }
 
             configureWidget(widgetId)
@@ -280,8 +282,7 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
         private fun configureWidget(widgetId: Int) {
             val info = mWidgetManager.getAppWidgetInfo(widgetId)
             if (info != null) {
-                val widgetInfo = LauncherAppWidgetProviderInfo.fromProviderInfo(launcher, info)
-                if (widgetInfo.configure != null) {
+                if (info.configure != null) {
                     sendIntent(widgetId)
                 } else {
                     addView(widgetId)
