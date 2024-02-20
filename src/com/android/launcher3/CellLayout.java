@@ -2717,7 +2717,7 @@ public class CellLayout extends ViewGroup {
                 if (!DESTRUCTIVE_REORDER &&
                         (mode == MODE_ON_DROP || mode == MODE_ON_DROP_EXTERNAL)) {
                     // Since the temp solution didn't update dragView, don't commit it either
-                    commitTempPlacement(null);
+                    commitTempPlacement(dragView);
                     completeAndClearReorderPreviewAnimations();
                     setItemPlacementDirty(false);
                 } else {
@@ -2761,7 +2761,7 @@ public class CellLayout extends ViewGroup {
             if (!DESTRUCTIVE_REORDER
                     && (mode == MODE_ON_DROP || mode == MODE_ON_DROP_EXTERNAL)) {
                 // Since the temp solution didn't update dragView, don't commit it either
-                commitTempPlacement(dragView);
+                commitTempPlacement(null);
                 completeAndClearReorderPreviewAnimations();
                 setItemPlacementDirty(false);
             } else {
