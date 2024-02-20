@@ -200,7 +200,6 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
                 mWidgetHost.startListening()
                 loadWidgets()
             }
-
             return mWrapper
         }
 
@@ -251,14 +250,18 @@ class WidgetContainer(context: Context, attrs: AttributeSet?) :
                 widgetsDbHelper
                     .getWidgets()
                     .sortedBy { it.position }
-                    .forEach { addView(it.widgetId, false) }
+                    .forEach { addView(it.widgetId) }
             } else {
-                mOldWidgets
-                    .filter { mWidgetHost.appWidgetIds.contains(it.id) }
-                    .sortedWith(
-                        compareBy(BlissDbUtils.WidgetItems::order, BlissDbUtils.WidgetItems::id)
-                    )
-                    .forEach { addView(it.id, true) }
+                if (mOldWidgets.isNotEmpty()) {
+                    mOldWidgets
+                        .filter { mWidgetHost.appWidgetIds.contains(it.id) }
+                        .sortedWith(
+                            compareBy(BlissDbUtils.WidgetItems::order, BlissDbUtils.WidgetItems::id)
+                        )
+                        .forEach { addView(it.id, true) }
+                } else {
+                    mWidgetHost.appWidgetIds.sorted().forEach { addView(it, true) }
+                }
             }
         }
 
