@@ -3274,6 +3274,7 @@ public class Workspace extends PagedView<WorkspacePageIndicatorDots>
         if (v instanceof DropTarget) {
             mDragController.removeDropTarget((DropTarget) v);
         }
+        clearEmptyCell();
     }
 
     /**
